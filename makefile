@@ -16,10 +16,10 @@ CLIENT = client
 SERVER = server
 
 #Client and Server compilation
-all: $(CLIENT) $(SERVER)
+all: $(SERVER)
 
-$(CLIENT): src/$(CLIENT).c
-	$(COMPILER) -std=$(VERSION) $(C_FLAGS) -o bin/$(CLIENT) src/$(CLIENT).c
+#$(CLIENT): src/$(CLIENT).c
+#	$(COMPILER) -std=$(VERSION) $(C_FLAGS) -o bin/$(CLIENT) src/$(CLIENT).c
 
 $(SERVER): src/$(SERVER).c
-	$(COMPILER) -std=$(VERSION) $(C_FLAGS) -o bin/$(SERVER) src/$(SERVER).c
+	$(COMPILER) -std=$(VERSION) $(C_FLAGS) -o bin/$(SERVER) src/$(SERVER).c src/utils.c
