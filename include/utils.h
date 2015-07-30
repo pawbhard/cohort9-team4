@@ -14,15 +14,18 @@
 #define TRUE 1
 #define FALSE 0
 #define BUFFER_SIZE 4096
+#define LOGGER(time, info, ...) printf("%s " info, time, ##__VA_ARGS__)
 
-static inline void logger (const char* info, ...) {
-	va_list args;
-	va_start(args, info);
+static inline char* get_date_time () {
+	char* time_data;
 	time_t t = time(NULL);
 	struct tm *tm = localtime(&t);
-	printf("%s:",asctime(tm));
-	printf (info, args);
+	time_data = asctime(tm);
+	time_data[strcspn(time_data, "\n")] = 0;
+	return time_data;
 }
 
 extern int create_udp_socket (	int* , const char*, const int*, 
 								struct sockaddr_in*);
+
+extern void reverse_string (char* , int);

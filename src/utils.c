@@ -1,5 +1,14 @@
 #include "../include/utils.h"
 
+extern void reverse_string (char* string, int length) {
+	char temp;
+	for (int i=0; i<(length/2); i++) {
+		temp = string[i];
+		string[i] = string[length-i-1];
+		string[length-i-1] = temp;
+	}
+}
+
 extern int create_udp_socket (	int* udp_socket,
 								const char* ipv4_address,
 								const int* port_number,
@@ -8,7 +17,7 @@ extern int create_udp_socket (	int* udp_socket,
 	*udp_socket = socket (PF_INET, SOCK_DGRAM, 0);
 
 	if (*udp_socket == -1) {
-		logger ("Failed to create UDP socket\n");
+		LOGGER (get_date_time(), "Failed to create UDP socket\n");
 		return FALSE;
 	}
 
@@ -19,7 +28,7 @@ extern int create_udp_socket (	int* udp_socket,
 
 	if (bind(*udp_socket, (struct sockaddr *) server_address, 
 		sizeof (*server_address))) {
-		logger ("Failed to bind %d\n", server_address->sin_port);
+		LOGGER (get_date_time(), "Failed to bind %d\n", server_address->sin_port);
 		return FALSE;
 	}
 
