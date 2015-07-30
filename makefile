@@ -4,7 +4,7 @@
 COMPILER = gcc
 
 #Compiler Version
-VERSION = c99
+VERSION = gnu99
 
 #Required flags for compilation
 C_FLAGS = -g -Wall

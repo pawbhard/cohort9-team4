@@ -1,15 +1,26 @@
 #include "../include/server.h"
 
-static int run_udp_server (int* udp_socket) {
+static int run_udp_server (	int* udp_socket, 
+							const char* multicast_ipv4_address) {
 	
 	struct sockaddr_in* client_address;
 	struct sockaddr_storage server_storage;
+	struct ip_mreq multicast_ipv4_request;
 	char data_buffer[BUFFER_SIZE];
 	int data_size;
 	int sent;
 	socklen_t server_address_size = sizeof(server_storage);
 
-	logger ("UDP server has started\n");
+	multicast_ipv4_request.imr_multiaddr.s_addr = 
+						inet_addr(multicast_ipv4_address);
+	multicast_ipv4_request.imr_interface.s_addr = INADDR_ANY;
+	if (setsockopt(*udp_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP, 
+              (const void *)&multicast_ipv4_request, sizeof(struct ip_mreq))) {
+		logger ("Failed to join multicast group\n");
+		return FALSE;
+	}
+
+	logger ("Multicast UDP server has started\n");
 
 	while (TRUE) {
 		data_size = recvfrom (*udp_socket, data_buffer, BUFFER_SIZE, 0, 
@@ -19,7 +30,7 @@ static int run_udp_server (int* udp_socket) {
 		
 		if (data_size == -1) {
 			logger ("Error receiving data from client %u\n", 
-					client_address->sin_port);	
+					client_address->sin_port);
 			continue;
 		}
 
@@ -46,7 +57,7 @@ static int run_udp_server (int* udp_socket) {
 
 int main (int argc, char const *argv[]) {
 	int udp_socket;
-	const char* ipv4_address;
+	const char* multicast_ipv4_address;
 	int port_number;
 	struct sockaddr_in server_address;
 
@@ -55,18 +66,19 @@ int main (int argc, char const *argv[]) {
 		return 1;
 	}
 
-	ipv4_address = argv[1];
+	multicast_ipv4_address = argv[1];
 	port_number = atoi(argv[2]);
-	if (!create_udp_socket(&udp_socket, ipv4_address, &port_number, 
+	if (!create_udp_socket(&udp_socket, multicast_ipv4_address, &port_number, 
 							&server_address)) {
 		logger ("Program abborting\n");
 		return 1;	
 	}
 
-	if (!run_udp_server(&udp_socket)) {
+	if (!run_udp_server(&udp_socket, multicast_ipv4_address)) {
 		logger ("Program abborting\n");
 		return 1;
 	}
-
+	close(udp_socket);
+	
 	return 0;
 }

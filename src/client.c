@@ -67,6 +67,6 @@ int main(int argc, char const *argv[]) {
 		logger ("Program abborting\n");
 		return 1;	
 	}
-
+	close(udp_socket);
 	return 0;
 }
