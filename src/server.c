@@ -1,15 +1,16 @@
 #include "../include/server.h"
 
-static int run_udp_server (	int* udp_socket, 
+static int run_multicast_udp_server (	int* udp_socket, 
 							const char* multicast_ipv4_address,
 							const int* server_port_number) {
 	
-	struct sockaddr_in server_storage;
+	struct sockaddr_in server_storage, client_storage;
 	struct ip_mreq multicast_ipv4_request;
 	char data_buffer[BUFFER_SIZE];
+	char client_ipv4_address[INET_ADDRSTRLEN];
 	int data_size;
 	int sent;
-	socklen_t server_address_size = sizeof(server_storage);
+	socklen_t client_address_size = 0;
 
 	memset(&server_storage, 0, sizeof(struct sockaddr_in));	
 	memset(&multicast_ipv4_request, 0, sizeof(struct ip_mreq));
@@ -32,29 +33,34 @@ static int run_udp_server (	int* udp_socket,
 
 	while (TRUE) {
 		data_size = recvfrom (*udp_socket, data_buffer, BUFFER_SIZE, 0, 
-					(struct sockaddr *)&server_storage, &server_address_size);
+					(struct sockaddr *)&client_storage, &client_address_size);
 
 		if (data_size == -1) {
 			LOGGER (get_date_time(), "Error receiving data from client %u\n", 
-					server_storage.sin_port);
+					ntohs(client_storage.sin_port));
 			continue;
 		}
 
-		LOGGER (get_date_time(), "Received \"%s\" from client %u\n", data_buffer, 
-				server_storage.sin_port);
+		inet_ntop( 	AF_INET, &(client_storage.sin_addr.s_addr), 
+					client_ipv4_address, INET_ADDRSTRLEN );
+		LOGGER (get_date_time(), "Received \"%s\" from client %s:%u\n", 
+				data_buffer, client_ipv4_address, 
+				ntohs(client_storage.sin_port));
 
 		reverse_string (data_buffer, strlen(data_buffer));
 		
 		LOGGER (get_date_time(), "Sending data to client\n");
 		sent = sendto (*udp_socket, data_buffer, data_size, 0, 
-			(struct sockaddr *)&server_storage, server_address_size);
+			(struct sockaddr *)&client_storage, client_address_size);
+
 		if (sent == -1) {
 			LOGGER (get_date_time(), "Error sending data to client %u\n", 
-					server_storage.sin_port);
+					client_storage.sin_port);
+			LOGGER (get_date_time(), "Continue waiting for clients\n");
 			continue;	
 		}
 		LOGGER (get_date_time(), "Sent \"%s\" to client %u\n", data_buffer, 
-				server_storage.sin_port);
+				ntohs(client_storage.sin_port));
 	}
 
 	return TRUE;
@@ -73,13 +79,14 @@ int main (int argc, char const *argv[]) {
 
 	multicast_ipv4_address = argv[1];
 	port_number = atoi(argv[2]);
-	if (!create_udp_socket(&udp_socket, multicast_ipv4_address, &port_number, 
-							&server_address)) {
+	if (!create_multicast_udp_socket(&udp_socket, multicast_ipv4_address, 
+		&port_number, &server_address)) {
 		LOGGER (get_date_time(), "Program abborting\n");
 		return 1;	
 	}
 
-	if (!run_udp_server(&udp_socket, multicast_ipv4_address, &port_number)) {
+	if (!run_multicast_udp_server(&udp_socket, multicast_ipv4_address, 
+		&port_number)) {
 		LOGGER (get_date_time(), "Program abborting\n");
 		return 1;
 	}

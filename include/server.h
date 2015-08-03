@@ -1,3 +1,3 @@
 #include "utils.h"
 
-static int run_udp_server (int*, const char*, const int*);
+static int run_multicast_udp_server (int*, const char*, const int*);

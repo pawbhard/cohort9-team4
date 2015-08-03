@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "../include/client.h"
 
-static int send_data_to_server (int* udp_socket,
+static int send_data_to_multicast_server (int* udp_socket,
 								const char* server_ipv4_address,
 								const int* client_port_number,
 								const int* server_port_number) {
@@ -18,34 +18,37 @@ static int send_data_to_server (int* udp_socket,
 	memset (server_address.sin_zero, '\0', sizeof (server_address.sin_zero));  
 
 	while (TRUE) {
+		server_address.sin_port = htons(*server_port_number);
 		LOGGER (get_date_time(), "Enter message: ");
 		fgets (data_buffer, BUFFER_SIZE, stdin);
 		data_buffer[strcspn(data_buffer, "\n")] = 0;
 
 		LOGGER (get_date_time(), "Sending \" %s \" to the server %u\n", 
-				data_buffer, server_address.sin_port);
+				data_buffer, ntohs(server_address.sin_port));
 
 		sent = sendto (*udp_socket, data_buffer, sizeof(data_buffer), 0,
 				(struct sockaddr *)&server_address, server_address_size);
 		if (sent == -1) {
 			LOGGER (get_date_time(), "Error sending data to server %u\n", 
-					server_address.sin_port);
+					ntohs(server_address.sin_port));
 			continue;	
 		}
 		LOGGER (get_date_time(), "Sent \" %s \" to server %u\n", data_buffer, 
-				server_address.sin_port);
+				ntohs(server_address.sin_port));
 		LOGGER (get_date_time(), "Waiting to receive data from server %u\n", 
-				server_address.sin_port);
+				ntohs(server_address.sin_port));
 
+    	
     	received = recvfrom (*udp_socket, data_buffer, BUFFER_SIZE, 0, 
-					(struct sockaddr *)&server_address, &server_address_size);
+					NULL, NULL);
 
     	if (received == -1) {
 			LOGGER (get_date_time(), "Error receiving data from server %u\n", 
-					server_address.sin_port);
+					ntohs(server_address.sin_port));
 			continue;	
 		}
-    	LOGGER (get_date_time(), "Received message from server: %s\n",data_buffer);
+    	LOGGER (get_date_time(), "Received message from server: %s\n",
+    			data_buffer);
   	}
 
   	return TRUE;
@@ -53,7 +56,7 @@ static int send_data_to_server (int* udp_socket,
 
 int main(int argc, char const *argv[]) {
 	int udp_socket;
-	const char* multicast_ipv4_address;
+	const char* multicast_group_ipv4_address;
 	int client_port_number;
 	int server_port_number;
 	struct sockaddr_in client_address;
@@ -63,18 +66,19 @@ int main(int argc, char const *argv[]) {
 		return 1;
 	}
 
-	multicast_ipv4_address = argv[1];
+	multicast_group_ipv4_address = argv[1];
 	client_port_number = atoi (argv[2]);
 	server_port_number = atoi (argv[3]);
 	
-	if (!create_udp_socket (	&udp_socket, multicast_ipv4_address, 
+	if (!create_multicast_udp_socket ( &udp_socket, NULL, 
 								&client_port_number, &client_address)) {
 		LOGGER (get_date_time(), "Program abborting\n");
 		return 1;	
 	}
 
-	if (!send_data_to_server(	&udp_socket, multicast_ipv4_address, 
-								&client_port_number, &server_port_number)) {
+	if (!send_data_to_multicast_server(	&udp_socket, 
+				multicast_group_ipv4_address, &client_port_number, 
+				&server_port_number)) {
 		LOGGER (get_date_time(), "Program abborting\n");
 		return 1;	
 	}
