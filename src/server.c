@@ -1,96 +1,114 @@
 #include "../include/server.h"
 
-static int run_multicast_udp_server (	int* udp_socket, 
-							const char* multicast_ipv4_address,
-							const int* server_port_number) {
+static int run_multicast_udp_server (int* send_udp_socket,
+							int* receive_udp_socket,
+							struct sockaddr_in *socket_address,
+							const char* multicast_group_ipv4_address,
+							const int* multicast_group_port_number,
+							const int* multicast_server_port_number) {
 	
-	struct sockaddr_in server_storage, client_storage;
-	struct ip_mreq multicast_ipv4_request;
+	struct sockaddr_in multicast_group_storage;
 	char data_buffer[BUFFER_SIZE];
-	char client_ipv4_address[INET_ADDRSTRLEN];
 	int data_size;
 	int sent;
-	socklen_t client_address_size = 0;
-
-	memset(&server_storage, 0, sizeof(struct sockaddr_in));	
-	memset(&multicast_ipv4_request, 0, sizeof(struct ip_mreq));
+	socklen_t multicast_server_address_size = sizeof(struct sockaddr_storage);
+	socklen_t socket_address_size = sizeof(struct sockaddr_storage);
+		
+	memset(&multicast_group_storage, 0, sizeof(struct sockaddr_in));	
 	
-	server_storage.sin_family = AF_INET;
-	server_storage.sin_port = htons (*server_port_number);
-	server_storage.sin_addr.s_addr = inet_addr (multicast_ipv4_address);
-	memset (server_storage.sin_zero, '\0', sizeof (server_storage.sin_zero));
-
-	multicast_ipv4_request.imr_multiaddr.s_addr = 
-						inet_addr(multicast_ipv4_address);
-	multicast_ipv4_request.imr_interface.s_addr = htonl(INADDR_ANY);
-	if (setsockopt (*udp_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP, 
-              (const void *)&multicast_ipv4_request, sizeof(struct ip_mreq))) {
-		LOGGER (get_date_time(), "Failed to join multicast group\n");
-		return FALSE;
-	}
+	multicast_group_storage.sin_family = AF_INET;
+	multicast_group_storage.sin_port = htons (*multicast_group_port_number);
+	multicast_group_storage.sin_addr.s_addr = 
+						inet_addr (multicast_group_ipv4_address);
 	
 	LOGGER (get_date_time(), "Multicast UDP server has started\n");
-
 	while (TRUE) {
-		data_size = recvfrom (*udp_socket, data_buffer, BUFFER_SIZE, 0, 
-					(struct sockaddr *)&client_storage, &client_address_size);
+
+		LOGGER (get_date_time(), "Waiting for clients to join"
+				" the multicast group\n");
+		data_size = recvfrom (*receive_udp_socket, data_buffer, BUFFER_SIZE, 0, 
+				(struct sockaddr *)socket_address, &socket_address_size);
 
 		if (data_size == -1) {
 			LOGGER (get_date_time(), "Error receiving data from client %u\n", 
-					ntohs(client_storage.sin_port));
+					ntohs(socket_address->sin_port));
 			continue;
 		}
 
-		inet_ntop( 	AF_INET, &(client_storage.sin_addr.s_addr), 
-					client_ipv4_address, INET_ADDRSTRLEN );
-		LOGGER (get_date_time(), "Received \"%s\" from client %s:%u\n", 
-				data_buffer, client_ipv4_address, 
-				ntohs(client_storage.sin_port));
-
-		reverse_string (data_buffer, strlen(data_buffer));
+		LOGGER (get_date_time(), "Received \" %s \" from client \n", 
+				data_buffer);
+		snprintf (data_buffer, BUFFER_SIZE, "Client has joined the "
+			"multicast group %s ", multicast_group_ipv4_address);
 		
-		LOGGER (get_date_time(), "Sending data to client\n");
-		sent = sendto (*udp_socket, data_buffer, data_size, 0, 
-			(struct sockaddr *)&client_storage, client_address_size);
+		LOGGER (get_date_time(), "Sending data \" %s \" to multicast group\n", 
+				data_buffer);
+		sent = sendto (*send_udp_socket, data_buffer, sizeof(data_buffer), 0, 
+					(struct sockaddr *)&multicast_group_storage, 
+					multicast_server_address_size);
 
 		if (sent == -1) {
-			LOGGER (get_date_time(), "Error sending data to client %u\n", 
-					client_storage.sin_port);
+			perror("Send to Error");
+			LOGGER (get_date_time(), "Error sending data to multicast group %u\n", 
+					multicast_group_storage.sin_port);
 			LOGGER (get_date_time(), "Continue waiting for clients\n");
 			continue;	
 		}
-		LOGGER (get_date_time(), "Sent \"%s\" to client %u\n", data_buffer, 
-				ntohs(client_storage.sin_port));
+		LOGGER (get_date_time(), "Sent \" %s \" to multicast group %s:%u\n", 
+			data_buffer, multicast_group_ipv4_address, 
+			ntohs(multicast_group_storage.sin_port));
 	}
-
+	close (*send_udp_socket);
+	close (*receive_udp_socket);
 	return TRUE;
 }
 
 int main (int argc, char const *argv[]) {
-	int udp_socket;
-	const char* multicast_ipv4_address;
-	int port_number;
-	struct sockaddr_in server_address;
+	int send_udp_socket;
+	int receive_udp_socket;
+	const char* multicast_group_ipv4_address;
+	int multicast_group_port_number;
+	int server_port_number;
+	struct sockaddr_in socket_address;
 
-	if (argc != 3) {
+	if (argc != 4) {
 		LOGGER (get_date_time(), "Insufficient number of arguments\n");
+		LOGGER (get_date_time(), "Usage: ./server "
+				"<multicast_group_ipv4_address> <multicast_group_port_number>"
+				" <server_port_number>\n");
 		return 1;
 	}
 
-	multicast_ipv4_address = argv[1];
-	port_number = atoi(argv[2]);
-	if (!create_multicast_udp_socket(&udp_socket, multicast_ipv4_address, 
-		&port_number, &server_address)) {
+	multicast_group_ipv4_address = argv[1];
+	multicast_group_port_number = atoi(argv[2]);
+	server_port_number = atoi(argv[3]);
+	
+	if (!create_udp_socket(&send_udp_socket, NULL, NULL, 
+		NULL, FALSE)) {
 		LOGGER (get_date_time(), "Program abborting\n");
+		close(send_udp_socket);
 		return 1;	
 	}
+	LOGGER (get_date_time(), "Created send UDP socket\n");
 
-	if (!run_multicast_udp_server(&udp_socket, multicast_ipv4_address, 
-		&port_number)) {
+	if (!create_udp_socket(&receive_udp_socket, NULL, 
+		&server_port_number, &socket_address, TRUE)) {
 		LOGGER (get_date_time(), "Program abborting\n");
+		close(send_udp_socket);
+		close(receive_udp_socket);
+		return 1;	
+	}
+	LOGGER (get_date_time(), "Created receive UDP socket\n");
+
+	if (!run_multicast_udp_server(&send_udp_socket, &receive_udp_socket, 
+		&socket_address, multicast_group_ipv4_address, 
+		&multicast_group_port_number, &server_port_number)) {
+		LOGGER (get_date_time(), "Program abborting\n");
+		close(send_udp_socket);
+		close(receive_udp_socket);
 		return 1;
 	}
-	close(udp_socket);
-	
+	close(send_udp_socket);
+	close(receive_udp_socket);
+		
 	return 0;
 }

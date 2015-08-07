@@ -9,10 +9,11 @@ extern void reverse_string (char* string, int length) {
 	}
 }
 
-extern int create_multicast_udp_socket (int* udp_socket,
-								const char* ipv4_address,
+extern int create_udp_socket (	int* udp_socket,
+								const char* socket_ipv4_address,
 								const int* port_number,
-								struct sockaddr_in* socket_address) {
+								struct sockaddr_in* socket_address,
+								int bind_socket) {
 	
 	*udp_socket = socket (AF_INET, SOCK_DGRAM, 0);
 	char check_ipv4_address[INET_ADDRSTRLEN];
@@ -22,12 +23,16 @@ extern int create_multicast_udp_socket (int* udp_socket,
 		return FALSE;
 	}
 
+	if (!bind_socket) {
+		LOGGER (get_date_time(),"Created UDP socket without bind\n");
+		return TRUE;
+	}
+
+	bzero((char *)socket_address, sizeof(*socket_address));
 	socket_address->sin_family = AF_INET;
 	socket_address->sin_port = htons (*port_number);
-	socket_address->sin_addr.s_addr = ipv4_address?
-					inet_addr (ipv4_address):INADDR_ANY;
-	memset (socket_address->sin_zero, '\0', 
-			sizeof (socket_address->sin_zero));  
+	socket_address->sin_addr.s_addr = socket_ipv4_address?
+							inet_addr (socket_ipv4_address):htonl (INADDR_ANY);
 
 	if (bind(*udp_socket, (struct sockaddr *) socket_address, 
 		sizeof (*socket_address))) {
@@ -37,7 +42,7 @@ extern int create_multicast_udp_socket (int* udp_socket,
 	}
 	inet_ntop( 	AF_INET, &(socket_address->sin_addr.s_addr), 
 				check_ipv4_address, INET_ADDRSTRLEN );
-	LOGGER (get_date_time(),"Created UDP socket %s:%u\n", 
+	LOGGER (get_date_time(),"Created UDP socket binded to %s:%u\n", 
 			check_ipv4_address, ntohs(socket_address->sin_port));
 	return TRUE;
 }

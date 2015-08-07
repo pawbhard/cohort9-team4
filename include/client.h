@@ -1,3 +1,4 @@
 #include "utils.h"
 
-static int send_data_to_multicast_server (int*, const char*, const int*, const int*);
+static int listen_to_multicast_server (int*, int*, struct sockaddr_in*, 
+					const char*, const int*, const char*, const int*);

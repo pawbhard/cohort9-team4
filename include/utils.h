@@ -25,7 +25,7 @@ static inline char* get_date_time () {
 	return time_data;
 }
 
-extern int create_multicast_udp_socket (int* , const char*, const int*, 
-								struct sockaddr_in*);
+extern int create_udp_socket (	int* , const char*, const int*, 
+								struct sockaddr_in*, int);
 
 extern void reverse_string (char* , int);
