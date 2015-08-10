@@ -1,13 +1,4 @@
-#include<stdio.h>
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<arpa/inet.h>
-#include<stdlib.h>
-#include<string.h>
-#include<unistd.h>
-
 #include "../include/multicast_client.h"
-#include "../include/multicast_util.h"
 
 void send_message(int socketfd, in_addr_t group_address,char *buffer)
 {
