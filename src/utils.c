@@ -46,3 +46,40 @@ extern int create_udp_socket (	int* udp_socket,
 			check_ipv4_address, ntohs(socket_address->sin_port));
 	return TRUE;
 }
+
+extern int compare_ipv4_address (ipv4_address addr1, ipv4_address addr2) {
+	if (addr1.a == addr2.a && addr1.b == addr2.b && addr1.c == addr2.c && addr1.d == addr2.d) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+extern void delete_message_list (message_list* head) {
+	message_list* cur = head;
+	message_list* node;
+	while (cur) {
+		node = cur;
+		cur = cur->next;
+		node->next = NULL;
+		free (node);
+	}
+}
+
+extern int add_message_to_list (message_list* head, char* buffer) {
+	message_list* node = (message_list*)malloc(sizeof(message_list));
+	message_list* cur = head;
+	if (!node) {
+		return FALSE;
+	}
+	strcpy(node->data, buffer);
+	node->next = NULL;
+	if (!cur) {
+		cur = node;
+		return TRUE;
+	}
+	while (cur->next) {
+		cur = cur->next;
+	}
+	cur->next = node;
+	return TRUE;
+}

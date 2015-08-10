@@ -16,6 +16,28 @@
 #define BUFFER_SIZE 4096
 #define LOGGER(time, info, ...) printf("%s " info, time, ##__VA_ARGS__)
 
+typedef struct ipv4_address {
+	int a,b,c,d;
+}ipv4_address;
+
+typedef struct message_list {
+	char data[BUFFER_SIZE];
+	struct message_list* next;
+}message_list;
+
+typedef struct client_node {
+	ipv4_address client_addr;
+	int id;
+	struct message_list* msg;
+	struct client_node* next;
+}client_node;
+
+typedef struct multicast_group {
+	ipv4_address group_addr;
+	client_node* client_list; 
+	struct multicast_group* next;	
+}multicast_group;
+
 static inline char* get_date_time () {
 	char* time_data;
 	time_t t = time(NULL);
@@ -25,7 +47,10 @@ static inline char* get_date_time () {
 	return time_data;
 }
 
-extern int create_udp_socket (	int* , const char*, const int*, 
+extern int create_udp_socket (	int*, const char*, const int*, 
 								struct sockaddr_in*, int);
 
-extern void reverse_string (char* , int);
+extern void reverse_string (char*, int);
+extern int compare_ipv4_address (ipv4_address, ipv4_address);
+extern void delete_message_list (message_list*);
+extern int add_message_to_list (message_list*, char*);
