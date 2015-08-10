@@ -4,8 +4,10 @@
 #include<arpa/inet.h>
 #include<stdlib.h>
 #include<string.h>
+#include<unistd.h>
+
 #include "../include/multicast_client.h"
- #include "../include/multicast_util.h"
+#include "../include/multicast_util.h"
 
 void send_message(int socketfd, in_addr_t group_address,char *buffer)
 {
@@ -20,8 +22,7 @@ void send_message(int socketfd, in_addr_t group_address,char *buffer)
     memset(&client, 0, sizeof(client));
     client.sin_family = AF_INET;
     client.sin_addr.s_addr = INADDR_ANY;
-    //send 10 message at regular interval
-    int i;
+    //send  message at regular interval
     while(1)
     {
         /*

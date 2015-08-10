@@ -5,9 +5,12 @@
 #include<netinet/in.h>
 #include<stdlib.h>
 #include<string.h>
+#include<unistd.h>
 #include <sys/param.h>
 
+#include "../include/multicast_server.h"
 #include<pthread.h> //for threading
+#include "../include/multicast_util.h"
 
 //TODO : initialization of server
 void init(void)
@@ -104,7 +107,7 @@ void run_group_server(void *arg)
     }
 
     
-    pthread tid; //thread to display messages every 20 sec
+    pthread_t tid; //thread to display messages every 20 sec
     unsigned int delay = 20; //TODO get from config file
 
     int ret =  pthread_create(&tid,  NULL ,(void *) *display_thread ,(void *) delay);
@@ -158,11 +161,11 @@ void display_thread(void * arg)
     }
 }
 
-void main(int argc, char * argv[])
+int  main(int argc, char * argv[])
 {
     server_info_t server_info; //TODO : not used now 
     init(); //TODO 
     run_group_server((void *) &server_info);
-    
+    return 0;    
     //Other Tasks
 }
