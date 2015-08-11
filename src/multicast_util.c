@@ -1,9 +1,8 @@
-#include<stdio.h>
-#include<sys/socket.h>
-#include<arpa/inet.h>
-#include<stdlib.h>
-#include<string.h>
-#include"../include/multicast_util.h"
+#include "../include/multicast_util.h"
+extern int compare_ipv4_address (ipv4_address addr1, ipv4_address addr2) {
+    return addr1.address == addr2.address;
+}
+
 int
 send_to_from(int fd, void *buf, size_t len, int flags,
         const struct sockaddr *to,
@@ -91,13 +90,6 @@ recv_from_to(int fd, void *buf, size_t len, int flags,
         }
     }
     return recv_length;
-}
-
-extern int compare_ipv4_address (ipv4_address addr1, ipv4_address addr2) {
-    if (addr1.a == addr2.a && addr1.b == addr2.b && addr1.c == addr2.c && addr1.d == addr2.d) {
-        return TRUE;
-    }
-    return FALSE;
 }
 
 extern void delete_message_list (message_list* head) {

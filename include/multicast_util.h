@@ -15,7 +15,7 @@
 #define BUFFER_SIZE 1024
 
 typedef struct ipv4_address {
-	int a,b,c,d;
+	in_addr_t address;
 }ipv4_address;
 
 typedef struct message_list {

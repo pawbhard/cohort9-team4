@@ -22,4 +22,4 @@ $(CLIENT): src/$(CLIENT).c
 	$(COMPILER) -std=$(VERSION) $(C_FLAGS) -pthread -o bin/$(CLIENT) src/$(CLIENT).c src/multicast_util.c
 
 $(SERVER): src/$(SERVER).c
-	$(COMPILER) -std=$(VERSION) $(C_FLAGS) -pthread -o bin/$(SERVER) src/$(SERVER).c src/multicast_util.c
+	$(COMPILER) -std=$(VERSION) $(C_FLAGS) -pthread -o bin/$(SERVER) src/$(SERVER).c src/multicast_util.c src/multicast_db.c
