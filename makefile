@@ -22,4 +22,4 @@ $(CLIENT): src/$(CLIENT).c
 	$(COMPILER) -std=$(VERSION) $(C_FLAGS) -o bin/$(CLIENT) src/$(CLIENT).c src/utils.c
 
 $(SERVER): src/$(SERVER).c
-	$(COMPILER) -std=$(VERSION) $(C_FLAGS) -o bin/$(SERVER) src/$(SERVER).c src/utils.c
+	$(COMPILER) -std=$(VERSION) $(C_FLAGS) -o bin/$(SERVER) src/$(SERVER).c src/utils.c src/database.c

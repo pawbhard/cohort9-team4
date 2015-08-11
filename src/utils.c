@@ -48,10 +48,7 @@ extern int create_udp_socket (	int* udp_socket,
 }
 
 extern int compare_ipv4_address (ipv4_address addr1, ipv4_address addr2) {
-	if (addr1.a == addr2.a && addr1.b == addr2.b && addr1.c == addr2.c && addr1.d == addr2.d) {
-		return TRUE;
-	}
-	return FALSE;
+	return addr1.address == addr2.address;
 }
 
 extern void delete_message_list (message_list* head) {
