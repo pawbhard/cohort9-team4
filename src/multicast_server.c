@@ -271,11 +271,11 @@ void receive_and_store_messages_server(int socketfd, multicast_group* head)
                                 (struct sockaddr *) &server_ad,
                                 sizeof(server_ad));
         (void)retval;
-        /*    
+            
         printf("\nServer received message from client : %s",inet_ntoa(client_ad.sin_addr));
         printf("\nServer received message for group : %s",inet_ntoa(server_ad.sin_addr));
         printf("\nMessage : %s\n\n",buffer);
-        */
+        
 
         // Adding message to storage queue
         //TODO : implement and remove below comment
