@@ -1,0 +1,123 @@
+[11:54] cohort9-team4 $./test/database_test.exe 
+DATABASE DEBUG DB(24): Created Object of database
+DATABASE DEBUG add_group(20): Adding group 1
+DATABASE DEBUG add_group(20): Adding group 2
+DATABASE DEBUG add_group(20): Adding group 3
+DATABASE DEBUG add_group(20): Adding group 4
+DATABASE DEBUG add_group(20): Adding group 5
+DATABASE DEBUG add_group(20): Adding group 6
+DATABASE DEBUG add_group(20): Adding group 7
+DATABASE DEBUG add_group(20): Adding group 2
+DATABASE ERROR add_group(23): Group Already exists 
+DATABASE DEBUG add_client_group(34): Adding client(100) and group(1) pair
+DATABASE DEBUG add_client_group(44): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(34): Adding client(100) and group(2) pair
+DATABASE DEBUG add_client_group(44): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(65): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(34): Adding client(300) and group(1) pair
+DATABASE DEBUG add_client_group(51): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(34): Adding client(400) and group(4) pair
+DATABASE DEBUG add_client_group(44): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(34): Adding client(500) and group(5) pair
+DATABASE DEBUG add_client_group(44): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(34): Adding client(600) and group(2) pair
+DATABASE DEBUG add_client_group(51): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(34): Adding client(700) and group(7) pair
+DATABASE DEBUG add_client_group(44): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(34): Adding client(500) and group(3) pair
+DATABASE DEBUG add_client_group(44): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(65): Previous mapping found Appending value
+
+Displaying all groups present :
+  1  2  3  4  5  6  7
+Displaying client to group
+Client id : 700. Groups :  7
+Client id : 600. Groups :  2
+Client id : 500. Groups :  3  5
+Client id : 400. Groups :  4
+Client id : 300. Groups :  1
+Client id : 100. Groups :  1  2
+
+Displaying group to client
+Group id : 3. Clients :  500
+Group id : 7. Clients :  700
+Group id : 5. Clients :  500
+Group id : 4. Clients :  400
+Group id : 2. Clients :  100  600
+Group id : 1. Clients :  100  300
+DATABASE DEBUG remove_client_group(75): Removing client(700) and group(7) pair
+DATABASE DEBUG remove_client_group(75): Removing client(100) and group(1) pair
+DATABASE DEBUG remove_client_group(75): Removing client(100) and group(4) pair
+
+Displaying all groups present :
+  1  2  3  4  5  6  7
+Displaying client to group
+Client id : 700. Groups :
+Client id : 600. Groups :  2
+Client id : 500. Groups :  3  5
+Client id : 400. Groups :  4
+Client id : 300. Groups :  1
+Client id : 100. Groups :  2
+
+Displaying group to client
+Group id : 3. Clients :  500
+Group id : 7. Clients :
+Group id : 5. Clients :  500
+Group id : 4. Clients :  400
+Group id : 2. Clients :  100  600
+Group id : 1. Clients :  300
+DATABASE DEBUG add_client_group(34): Adding client(800) and group(3) pair
+DATABASE DEBUG add_client_group(51): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(34): Adding client(800) and group(1) pair
+DATABASE DEBUG add_client_group(51): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(65): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(34): Adding client(800) and group(2) pair
+DATABASE DEBUG add_client_group(51): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(65): Previous mapping found Appending value
+
+Displaying all groups present :
+  1  2  3  4  5  6  7
+Displaying client to group
+Client id : 800. Groups :  1  2  3
+Client id : 700. Groups :
+Client id : 600. Groups :  2
+Client id : 500. Groups :  3  5
+Client id : 400. Groups :  4
+Client id : 300. Groups :  1
+Client id : 100. Groups :  2
+
+Displaying group to client
+Group id : 3. Clients :  500  800
+Group id : 7. Clients :
+Group id : 5. Clients :  500
+Group id : 4. Clients :  400
+Group id : 2. Clients :  100  600  800
+Group id : 1. Clients :  300  800
+DATABASE DEBUG remove_client(112): Removing client(800)
+
+Displaying all groups present :
+  1  2  3  4  5  6  7
+Displaying client to group
+Client id : 700. Groups :
+Client id : 600. Groups :  2
+Client id : 500. Groups :  3  5
+Client id : 400. Groups :  4
+Client id : 300. Groups :  1
+Client id : 100. Groups :  2
+
+Displaying group to client
+Group id : 3. Clients :  500
+Group id : 7. Clients :
+Group id : 5. Clients :  500
+Group id : 4. Clients :  400
+Group id : 2. Clients :  100  600
+Group id : 1. Clients :  300
+[11:55] cohort9-team4 $
+
