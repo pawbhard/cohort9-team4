@@ -13,7 +13,7 @@
 
 #define TRUE 1
 #define FALSE 0
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 4096	
 #define LOGGER(time, info, ...) printf("%s " info, time, ##__VA_ARGS__)
 
 typedef struct ipv4_address {
@@ -29,13 +29,11 @@ typedef struct client_node {
 	ipv4_address client_addr;
 	int id;
 	struct message_list* msg;
-	struct client_node* next;
 }client_node;
 
 typedef struct multicast_group {
 	ipv4_address group_addr;
-	client_node* client_list; 
-	struct multicast_group* next;	
+	client_node* client_list;
 }multicast_group;
 
 static inline char* get_date_time () {
