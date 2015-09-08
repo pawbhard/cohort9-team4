@@ -18,6 +18,7 @@ typedef struct buf_data_ {
     int cpu_usage;
     int temperature;
     int pkt_rate;
+    buf_data_ *next;
 } buf_data;
 
 
@@ -26,7 +27,8 @@ class SwitchDataBuffer:public Thread {
         int switch_id;
         string switch_name;
         int switch_ip;
-        buf_data switch_buf_data[MAX_DATA_BUFSZ];
+        buf_data *buf_hdr;
+        buf_data *buf_tail;
         int cur_buffer_size;
         static int switch_count;
 
@@ -35,6 +37,7 @@ class SwitchDataBuffer:public Thread {
         void startDataCollection(void);
         int addToBuffer(buf_data &);
         int removeFromBuffer();
+        void printBufferData();
 
         virtual void run();
 };

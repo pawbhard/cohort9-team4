@@ -6,8 +6,6 @@
 
 using namespace std;
 
-
-
 void SwitchDataBuffer::startDataCollection(void) {
 
     buf_data switch_data;
@@ -22,6 +20,7 @@ void SwitchDataBuffer::startDataCollection(void) {
         {
             cout << "ALERT: Adding data to buffer failed"<<endl;
         }
+        printBufferData();
         sleep(1);
 
     }
@@ -30,19 +29,47 @@ void SwitchDataBuffer::startDataCollection(void) {
 int SwitchDataBuffer::addToBuffer(buf_data &data) {
     
     if( cur_buffer_size >= MAX_DATA_BUFSZ ) {
-        cout << "ALERT Max Buffer Limit reached for switch "<<switch_name<<endl;
+        cout << "ALERT: Max Buffer Limit reached for switch "<<switch_name<<endl;
         return FAILURE;
     }
+    
+    buf_data *buf = new buf_data;
 
-    switch_buf_data[cur_buffer_size].cpu_usage = data.cpu_usage;
-    switch_buf_data[cur_buffer_size].temperature = data.temperature;
-    switch_buf_data[cur_buffer_size].pkt_rate = data.pkt_rate;
+    buf->cpu_usage = data.cpu_usage;
+    buf->temperature = data.temperature;
+    buf->pkt_rate = data.pkt_rate;
+
+    if( buf_hdr == NULL ) {
+        buf_hdr = buf;
+        buf_tail = buf;
+    }
+    else {
+        buf_tail->next = buf;
+        buf_tail = buf;
+    }
+    buf->next = buf_hdr;
 
     cur_buffer_size++;
 
     if(cur_buffer_size >= STORE_LIMIT)
         cout << "Buffer store limit reached/exceeded"<<endl;
+    return SUCCESS;
 }
+
+void SwitchDataBuffer::printBufferData() {
+    
+    if( buf_hdr == NULL )
+        cout << "list empty"<<endl;
+    else {
+        buf_data *tmp = buf_hdr;
+        cout << endl<<switch_name<<":"<<switch_id<<":cur buffer size :"<<cur_buffer_size<<endl;
+        do {
+            cout << "cpu usage :"<<tmp->cpu_usage<<" temp:"<<tmp->temperature<<" pkt rate:"<<tmp->pkt_rate<<endl;
+            tmp = tmp->next;
+        } while( tmp != buf_tail );
+    }
+}
+
 
 int SwitchDataBuffer::removeFromBuffer() {
     
