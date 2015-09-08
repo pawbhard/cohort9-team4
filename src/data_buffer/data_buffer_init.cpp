@@ -22,13 +22,10 @@ SwitchDataBuffer::SwitchDataBuffer(string sname, int ip)
     }
 }
 
-
-
-void SwitchDataBuffer::start_data_collection(void *arg) {
-   //spawn threads for each switch to fill individual buffers
-
-
+void SwitchDataBuffer::run() {
+    startDataCollection();
 }
+
 
 
 int init_data_buffers() {
@@ -38,8 +35,8 @@ int init_data_buffers() {
     SwitchDataBuffer sdbuf(sw_name, 0x1010101);
    
     //Thread has to be started
-    //sdbuf.startThread();
-    //sdbuf.joinThread();
+    sdbuf.start();
+    sdbuf.join();
     return 0;
 }
 
