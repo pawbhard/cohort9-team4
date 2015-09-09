@@ -3,8 +3,11 @@
 #Compiler used
 COMPILER = g++
 
+#C++ standard used
+STANDARD = gnu++11
+
 #Required flags for compilation
-C_FLAGS = -g -Wall
+C_FLAGS = -g -Wall -pthread
 
 #Output target for client
 CLIENT = client
@@ -18,4 +21,4 @@ UTILS = common_util
 all: $(CLIENT)
 
 $(CLIENT): src/$(CLIENT)/client_infra.cpp
-	$(COMPILER) $(C_FLAGS) -o bin/$(CLIENT) src/$(CLIENT)/client_infra.cpp src/$(UTILS)/utils.cpp
+	$(COMPILER) -std=$(STANDARD) $(C_FLAGS) -o bin/$(CLIENT) src/$(CLIENT)/client_infra.cpp src/$(CLIENT)/client_leave_join_group.cpp src/$(CLIENT)/client_connection.cpp src/$(CLIENT)/client_task_execute.cpp
