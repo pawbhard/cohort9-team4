@@ -12,7 +12,7 @@ extern void *client_group_join_or_leave (void *v_connection) {
 			case '1': 	std::cout << get_date_time() << "Retreiving the list of available groups from the server...\n";
 						strcpy(group_list,"");
 						display_group_list_from_server(connection, AVAILABLE);
- 						std::cout << get_date_time() << "Enter the list of groups you want to join (Eg: 1A,2B,3A,4C) : ";
+ 						std::cout << get_date_time() << "Enter the list of groups you want to join (Eg: 1,2,3,4) : ";
  						cin >> group_list;
  						send_join_or_leave_messsage(connection, group_list, JOIN);
 						std::cout << get_date_time() << "Sending registration messages to these groups\n";
@@ -20,14 +20,16 @@ extern void *client_group_join_or_leave (void *v_connection) {
 			case '2':	std::cout << get_date_time() << "List of registered groups\n";
 						strcpy(group_list,"");
 						display_group_list_from_server(connection, REGISTERED);
-						std::cout << get_date_time() << "Enter the list of groups you want to leave (Eg: 1A,2B,3A,4C) : ";
+						std::cout << get_date_time() << "Enter the list of groups you want to leave (Eg: 1,2,3,4) : ";
 						cin >> group_list;
  						send_join_or_leave_messsage(connection, group_list, LEAVE);
 						std::cout << get_date_time() << "Sending leave messages to these groups\n";
 						break;
 			case '3':	std::cout << get_date_time() << "Leaving all the groups\n";
+						strcpy(group_list, "all");
+						send_join_or_leave_messsage(connection, group_list, LEAVE);
 						flag = FALSE;
-						//close (connection->local_fd);
+						close (connection->local_fd);
 						break;
 			default:	continue; 
 		}

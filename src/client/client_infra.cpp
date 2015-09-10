@@ -10,7 +10,7 @@ int main (int argc , const char *argv[]) {
 	char server_ip[16] = "0.0.0.0";
 	int server_port = 0;
 	pthread_t registeration_thread;
-	//pthread_t task_thread;
+	pthread_t task_thread;
 
 	if (argc < 3) {
 		show_usage();	
@@ -34,11 +34,11 @@ int main (int argc , const char *argv[]) {
 		std::cout << get_date_time() << "Unable to create registration thread\n";
 		return FAILURE;
 	}
-	/*
+	
 	if (!pthread_create(&task_thread, NULL, &client_receive_and_execute_task, &client_server_connection)) {
 		std::cout << get_date_time() << "Unable to create task thread\n";
 		return FAILURE;	
 	}
-	*/
+	
 	return SUCCESS;
 }

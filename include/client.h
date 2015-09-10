@@ -16,3 +16,4 @@ syserr_t establish_server_connection (	connection_handler*,
 extern void *client_group_join_or_leave (void *);
 void display_group_list_from_server(connection_handler*, bool);
 void send_join_or_leave_messsage(connection_handler*, char*, char);
+void *client_receive_and_execute_task (void *);
