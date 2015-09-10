@@ -2,6 +2,8 @@
 #define data_buffer_h
 
 #include <string>
+#include <netinet/in.h>
+
 #include "thread_common.h"
 
 #define SUCCESS 0
@@ -18,25 +20,35 @@ typedef struct buf_data_ {
     int cpu_usage;
     int temperature;
     int pkt_rate;
-    buf_data_ *next;
 } buf_data;
+
+typedef struct buf_data_node_ {
+    buf_data data;
+    buf_data_node_ *next;
+} buf_data_node;
 
 
 class SwitchDataBuffer:public Thread {
     private:
         int switch_id;
         string switch_name;
-        int switch_ip;
-        buf_data *buf_hdr;
-        buf_data *buf_tail;
+        in_addr_t switch_ip;
+        buf_data_node *buf_hdr;
+        buf_data_node *buf_tail;
         int cur_buffer_size;
         static int switch_count;
+        pthread_mutex_t lock;
+        bool collect;
 
     public:
-        SwitchDataBuffer(string, int);
+        SwitchDataBuffer(string, in_addr_t);
         void startDataCollection(void);
+        void stopDataCollection(void);
         int addToBuffer(buf_data &);
-        int removeFromBuffer();
+        bool storeLimitReached();
+        bool hardLimitReached();
+        void removeAllFromBuffer();
+        list<buf_data> getListOfDataAndFlush();
         void printBufferData();
 
         virtual void run();
