@@ -38,7 +38,7 @@ void *client_receive_and_execute_task (void *v_connection) {
 
 	
 	do {
-		std::cout << get_date_time() << "Waiting for data from server\n";
+		std::cout << get_date_time() << " Waiting for data from server\n";
 		read (connection->local_fd, data, BUFFER_SIZE);
 		task_id = (task_type)atoi(data);
 		i = 2;
@@ -61,17 +61,17 @@ void *client_receive_and_execute_task (void *v_connection) {
     	}
     	input[k] = strtod(data+i-j, NULL);
     	switch (task_id) {
-    		case mean: 		std::cout << get_date_time() << "Calculating mean of %d elements\n";
+    		case mean: 		std::cout << get_date_time() << " Calculating mean of %d elements\n";
     						calculate_mean(input, input_size, result);
     						break;
-    		case median:	std::cout << get_date_time() << "Calculating median of %d elements\n";
+    		case median:	std::cout << get_date_time() << " Calculating median of %d elements\n";
     						calculate_median(input, input_size, result);
     						break; 
     		case standard_deviation:
-    						std::cout << get_date_time() << "Calculating standard_deviation for %d elements\n";
+    						std::cout << get_date_time() << " Calculating standard_deviation for %d elements\n";
     						calculate_standard_deviation(input, input_size, result);
     						break;  
-    		case range:		std::cout << get_date_time() << "Calculating range for %d elements\n";
+    		case range:		std::cout << get_date_time() << " Calculating range for %d elements\n";
     						calculate_range(input, input_size, result);
     						break;
     		default:		free (input);
