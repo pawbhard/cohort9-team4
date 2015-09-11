@@ -1,0 +1,171 @@
+DATABASE DEBUG DB(27): Created Object of database
+DATABASE DEBUG add_group(20): Adding group 1
+DATABASE DEBUG add_group(20): Adding group 2
+DATABASE DEBUG add_group(20): Adding group 3
+DATABASE DEBUG add_group(20): Adding group 4
+DATABASE DEBUG add_group(20): Adding group 5
+DATABASE DEBUG add_group(20): Adding group 6
+DATABASE DEBUG add_group(20): Adding group 7
+DATABASE DEBUG add_group(20): Adding group 2
+DATABASE ERROR add_group(23): Group Already exists 
+DATABASE DEBUG add_client_group(34): Adding client(100) and group(1) pair
+DATABASE DEBUG add_client_group(44): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(69): Creating new Client state mapping
+DATABASE DEBUG add_new_client_state(47): Adding Client(100) state as free
+DATABASE DEBUG add_client_group(34): Adding client(100) and group(2) pair
+DATABASE DEBUG add_client_group(44): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(65): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(69): Creating new Client state mapping
+DATABASE DEBUG add_new_client_state(47): Adding Client(100) state as free
+DATABASE DEBUG add_client_group(34): Adding client(300) and group(1) pair
+DATABASE DEBUG add_client_group(51): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(69): Creating new Client state mapping
+DATABASE DEBUG add_new_client_state(47): Adding Client(300) state as free
+DATABASE DEBUG add_client_group(34): Adding client(400) and group(4) pair
+DATABASE DEBUG add_client_group(44): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(69): Creating new Client state mapping
+DATABASE DEBUG add_new_client_state(47): Adding Client(400) state as free
+DATABASE DEBUG add_client_group(34): Adding client(500) and group(5) pair
+DATABASE DEBUG add_client_group(44): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(69): Creating new Client state mapping
+DATABASE DEBUG add_new_client_state(47): Adding Client(500) state as free
+DATABASE DEBUG add_client_group(34): Adding client(600) and group(2) pair
+DATABASE DEBUG add_client_group(51): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(69): Creating new Client state mapping
+DATABASE DEBUG add_new_client_state(47): Adding Client(600) state as free
+DATABASE DEBUG add_client_group(34): Adding client(700) and group(7) pair
+DATABASE DEBUG add_client_group(44): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(69): Creating new Client state mapping
+DATABASE DEBUG add_new_client_state(47): Adding Client(700) state as free
+DATABASE DEBUG add_client_group(34): Adding client(500) and group(3) pair
+DATABASE DEBUG add_client_group(44): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(65): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(69): Creating new Client state mapping
+DATABASE DEBUG add_new_client_state(47): Adding Client(500) state as free
+DATABASE DEBUG add_client_group(34): Adding client(200) and group(7) pair
+DATABASE DEBUG add_client_group(51): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(69): Creating new Client state mapping
+DATABASE DEBUG add_new_client_state(47): Adding Client(200) state as free
+DATABASE DEBUG add_client_group(34): Adding client(800) and group(7) pair
+DATABASE DEBUG add_client_group(51): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(69): Creating new Client state mapping
+DATABASE DEBUG add_new_client_state(47): Adding Client(800) state as free
+DATABASE DEBUG add_client_group(34): Adding client(900) and group(7) pair
+DATABASE DEBUG add_client_group(51): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(58): No previous mapping found . creating new
+DATABASE DEBUG add_client_group(69): Creating new Client state mapping
+DATABASE DEBUG add_new_client_state(47): Adding Client(900) state as free
+
+Displaying all groups present :
+  1  2  3  4  5  6  7
+Displaying client to group
+Client id : 900. Groups :  7
+Client id : 800. Groups :  7
+Client id : 200. Groups :  7
+Client id : 700. Groups :  7
+Client id : 600. Groups :  2
+Client id : 500. Groups :  3  5
+Client id : 400. Groups :  4
+Client id : 300. Groups :  1
+Client id : 100. Groups :  1  2
+
+Displaying group to client
+Group id : 3. Clients :  500
+Group id : 7. Clients :  200  700  800  900
+Group id : 5. Clients :  500
+Group id : 4. Clients :  400
+Group id : 2. Clients :  100  600
+Group id : 1. Clients :  100  300
+DATABASE DEBUG remove_client_group(78): Removing client(700) and group(7) pair
+DATABASE DEBUG remove_client_group(78): Removing client(100) and group(1) pair
+DATABASE DEBUG remove_client_group(78): Removing client(100) and group(4) pair
+
+Displaying all groups present :
+  1  2  3  4  5  6  7
+Displaying client to group
+Client id : 900. Groups :  7
+Client id : 800. Groups :  7
+Client id : 200. Groups :  7
+Client id : 700. Groups :
+Client id : 600. Groups :  2
+Client id : 500. Groups :  3  5
+Client id : 400. Groups :  4
+Client id : 300. Groups :  1
+Client id : 100. Groups :  2
+
+Displaying group to client
+Group id : 3. Clients :  500
+Group id : 7. Clients :  200  800  900
+Group id : 5. Clients :  500
+Group id : 4. Clients :  400
+Group id : 2. Clients :  100  600
+Group id : 1. Clients :  300
+DATABASE DEBUG add_client_group(34): Adding client(800) and group(3) pair
+DATABASE DEBUG add_client_group(51): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(65): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(69): Creating new Client state mapping
+DATABASE DEBUG add_new_client_state(47): Adding Client(800) state as free
+DATABASE DEBUG add_client_group(34): Adding client(800) and group(1) pair
+DATABASE DEBUG add_client_group(51): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(65): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(69): Creating new Client state mapping
+DATABASE DEBUG add_new_client_state(47): Adding Client(800) state as free
+DATABASE DEBUG add_client_group(34): Adding client(800) and group(2) pair
+DATABASE DEBUG add_client_group(51): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(65): Previous mapping found Appending value
+DATABASE DEBUG add_client_group(69): Creating new Client state mapping
+DATABASE DEBUG add_new_client_state(47): Adding Client(800) state as free
+
+Displaying all groups present :
+  1  2  3  4  5  6  7
+Displaying client to group
+Client id : 900. Groups :  7
+Client id : 800. Groups :  1  2  3  7
+Client id : 200. Groups :  7
+Client id : 700. Groups :
+Client id : 600. Groups :  2
+Client id : 500. Groups :  3  5
+Client id : 400. Groups :  4
+Client id : 300. Groups :  1
+Client id : 100. Groups :  2
+
+Displaying group to client
+Group id : 3. Clients :  500  800
+Group id : 7. Clients :  200  800  900
+Group id : 5. Clients :  500
+Group id : 4. Clients :  400
+Group id : 2. Clients :  100  600  800
+Group id : 1. Clients :  300  800
+DATABASE DEBUG set_client_busy_free(41): Client(800) state is changes as false
+DATABASE DEBUG get_free_client_list(10): Getting list of free client for group_id
+DATABASE DEBUG get_clients_for_group(150): Getting all clients for group_id (7)
+Displaying free clients for group 7 :   --> 200  --> 900
+DATABASE DEBUG remove_client(115): Removing client(800)
+
+Displaying all groups present :
+  1  2  3  4  5  6  7
+Displaying client to group
+Client id : 900. Groups :  7
+Client id : 200. Groups :  7
+Client id : 700. Groups :
+Client id : 600. Groups :  2
+Client id : 500. Groups :  3  5
+Client id : 400. Groups :  4
+Client id : 300. Groups :  1
+Client id : 100. Groups :  2
+
+Displaying group to client
+Group id : 3. Clients :  500
+Group id : 7. Clients :  200  900
+Group id : 5. Clients :  500
+Group id : 4. Clients :  400
+Group id : 2. Clients :  100  600
+Group id : 1. Clients :  300
