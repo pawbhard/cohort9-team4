@@ -12,13 +12,16 @@
 #define SUCCESS 1
 
 using namespace std;
+
 //Database class to provide only one instace of the object 
 class DB 
 {
     private : unordered_map <int, set<int>>  group_to_client;
               unordered_map <int, set<int>>  client_to_group;
-              unordered_map <in_addr_t, int> client_ip_to_id;
+              unordered_map <client_info_t, int> client_ip_to_id;
+              unordered_map <int, bool> client_state;       //true free , false busy
               set <int> group_set;
+
               DB()
               {
                   DATABASE_DEBUG("Created Object of database");
@@ -40,6 +43,10 @@ class DB
               int get_client_id_from_ip(int client_id);
               int set_client_id_from_ip(struct inet_addr);
               
+              set<int> get_free_client_list(int group_id);
+              int set_client_busy(int client_id);
+              int add_new_client_state(int client_id);
+
               //DISPLAY for debugging
               void display_group();
               void display_client_to_group();
