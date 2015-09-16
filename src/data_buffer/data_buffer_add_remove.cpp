@@ -8,6 +8,77 @@
 
 using namespace std;
 
+pthread_mutex_t snmp_lock;
+
+int doSnmpGet(const char *cur_oid, const char *ip, int *data_ptr) {
+    
+    struct snmp_pdu *pdu;                   
+    struct snmp_pdu *response;
+    struct snmp_session session, *sess_handle;
+
+    struct variable_list *vars;            
+
+    oid id_oid[MAX_OID_LEN];
+    oid serial_oid[MAX_OID_LEN];
+
+    size_t id_len = MAX_OID_LEN;
+    size_t serial_len = MAX_OID_LEN;
+
+    int status;                             
+    int val;
+    
+    pthread_mutex_lock(&snmp_lock);
+
+    sess_handle = snmp_open(&session);
+    
+    init_snmp("MibCheck");
+
+    snmp_sess_init( &session );
+    session.version = SNMP_VERSION_2c;
+    session.community = (u_char *)SNMP_COMMUNITY;
+    session.community_len = strlen(SNMP_COMMUNITY);
+    session.peername = (char *)ip;
+
+    add_mibdir(".");
+
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
+
+//    read_objid("CISCO-PROCESS-MIB::cpmCPUTotal1minRev.1", id_oid, &id_len);
+    
+    if( !snmp_parse_oid(cur_oid, id_oid, &id_len)) {
+        cout << "snmp oid parsing failed"<<endl;
+        return -1;
+    }
+    
+//    read_objid(cur_oid, id_oid, &id_len);
+
+    snmp_add_null_var(pdu, id_oid, id_len);
+
+    status = snmp_synch_response(sess_handle, pdu, &response);
+    
+
+    if( status == 0) {
+        for(vars = response->variables; vars; vars = vars->next_variable) {
+                *data_ptr = (int) *(vars->val.integer);
+                print_value(vars->name, vars->name_length, vars);
+                val = 0;
+                break;
+        }
+    } else {
+        cout << "SNMP Get failed for switch IP :"<<ip<<" oid :"<<cur_oid<<endl;
+        *data_ptr = -1;
+        val = -1;
+    }
+    
+    snmp_free_pdu(response);
+    snmp_close(sess_handle);
+
+    pthread_mutex_unlock(&snmp_lock);
+
+    return val;
+}
+
+
 void SwitchDataBuffer::stopDataCollection(void) {
     collect = false;
 }
@@ -16,21 +87,30 @@ void SwitchDataBuffer::stopDataCollection(void) {
 void SwitchDataBuffer::startDataCollection(void) {
 
     buf_data switch_data;
+    bool wait = false;
     collect = true;
 
     //connect to switch
     while(collect == true) {
         //Do SNMP get 
-        switch_data.cpu_usage = rand()%100;
-        switch_data.temperature = rand()%200;
-        switch_data.pkt_rate = rand()%10000;
-        if(addToBuffer(switch_data) != SUCCESS)
-        {
-            cout << "ALERT: Adding data to buffer failed"<<endl;
+        if ( doSnmpGet("CISCO-PROCESS-MIB::cpmCPUTotal1minRev.1", switch_ip.c_str(), &switch_data.cpu_rate) == -1
+            || doSnmpGet("CISCO-PROCESS-MIB::cpmCPUMemoryUsed.1", switch_ip.c_str(), &switch_data.cpu_mem_usage) == -1) {
+            wait = true;
         }
-        printBufferData();
-        sleep(1);
 
+        if( wait == false) {
+            if(addToBuffer(switch_data) != SUCCESS)
+            {
+                cout << "ALERT: Adding data to buffer failed"<<endl;
+            }
+        }
+
+        if( hardLimitReached() || wait ) {
+            printBufferData();
+            getListOfDataAndFlush();
+            sleep(1);
+            wait = false;
+        }
     }
 }
 
@@ -44,11 +124,12 @@ int SwitchDataBuffer::addToBuffer(buf_data &data) {
     }
     
     buf_data_node *buf = new buf_data_node;
-
-    buf->data.cpu_usage = data.cpu_usage;
-    buf->data.temperature = data.temperature;
-    buf->data.pkt_rate = data.pkt_rate;
-
+    
+    buf->data = data;
+/*
+    buf->data.cpu_rate = data.cpu_rate;
+    buf->data.cpu_mem_usage = data.cpu_mem_usage;
+*/
     if( cur_buffer_size == 0 || buf_hdr == NULL ) {
         buf_hdr = buf;
         buf_tail = buf;
@@ -83,6 +164,7 @@ list<buf_data> SwitchDataBuffer::getListOfDataAndFlush() {
             buf_list.push_back(tmp->data);
             tmp = tmp->next;
             delete cur;
+            cur_buffer_size--;
             count++;        
         } while( tmp != buf_tail && count < STORE_LIMIT);
         
@@ -102,7 +184,7 @@ void SwitchDataBuffer::printBufferData() {
         buf_data_node *tmp = buf_hdr;
         cout << endl<<switch_name<<":"<<switch_id<<":cur buffer size :"<<cur_buffer_size<<endl;
         do {
-            cout << "cpu usage :"<<tmp->data.cpu_usage<<" temp:"<<tmp->data.temperature<<" pkt rate:"<<tmp->data.pkt_rate<<endl;
+            cout << "cpu usage :"<<tmp->data.cpu_rate<<" temp:"<<tmp->data.cpu_mem_usage<<endl;
             tmp = tmp->next;
         } while( tmp != buf_tail );
     }
@@ -110,13 +192,13 @@ void SwitchDataBuffer::printBufferData() {
 
 bool SwitchDataBuffer::storeLimitReached() {
 
-    if(cur_buffer_size >= STORE_LIMIT+1)
+    if(cur_buffer_size >= STORE_LIMIT-1)
         return true;
     return false;
 }
 
 bool SwitchDataBuffer::hardLimitReached() {
-    if(cur_buffer_size >= HARD_LIMIT+1)
+    if(cur_buffer_size >= HARD_LIMIT-1)
         return true;
     return false;
 }

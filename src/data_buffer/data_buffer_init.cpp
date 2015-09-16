@@ -13,7 +13,7 @@ using namespace std;
 
 int SwitchDataBuffer::switch_count = 0;
 
-SwitchDataBuffer::SwitchDataBuffer(string sname, in_addr_t ip)
+SwitchDataBuffer::SwitchDataBuffer(string sname, string ip)
 {
     if( switch_count < MAX_SWITCHES ){
         ++switch_count;
@@ -44,14 +44,14 @@ void SwitchDataBuffer::run() {
 list<SwitchDataBuffer *> init_data_buffers() {
     //read from switch db or config file
     
-    int num_switches = 3;
-    string conf_arr[3][3] = { {"s1","10.10.10.10"}, {"s2","20.20.20.20"}, {"s3","30.30.30.30"}};
+    int num_switches = 2;
+    string conf_arr[2][2] = { {"s1","10.193.52.162"}, {"s2","10.193.52.163"}};
 
     list <SwitchDataBuffer *> switch_list; 
 
     for ( int i=0; i<num_switches; i++ )
     {
-        SwitchDataBuffer *sdbuf = new SwitchDataBuffer(conf_arr[i][0], inet_addr(conf_arr[i][1].c_str()));
+        SwitchDataBuffer *sdbuf = new SwitchDataBuffer(conf_arr[i][0], conf_arr[i][1]);
         switch_list.push_back(sdbuf);
         sdbuf->start();
     }
