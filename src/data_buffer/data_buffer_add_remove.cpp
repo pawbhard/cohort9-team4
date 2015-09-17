@@ -60,7 +60,6 @@ int doSnmpGet(const char *cur_oid, const char *ip, int *data_ptr) {
     if( status == 0) {
         for(vars = response->variables; vars; vars = vars->next_variable) {
                 *data_ptr = (int) *(vars->val.integer);
-                print_value(vars->name, vars->name_length, vars);
                 val = 0;
                 break;
         }
