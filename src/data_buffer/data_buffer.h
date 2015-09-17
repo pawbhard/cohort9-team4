@@ -12,7 +12,7 @@
 #define FAILURE -1
 
 #define STORE_LIMIT 128
-#define HARD_LIMIT 256
+#define HARD_LIMIT 512
 #define MAX_DATA_BUFSZ 4096
 #define SNMP_COMMUNITY "demopublic"
 #define MAX_SWITCHES 10

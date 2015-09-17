@@ -25,12 +25,11 @@ int doSnmpGet(const char *cur_oid, const char *ip, int *data_ptr) {
     size_t serial_len = MAX_OID_LEN;
 
     int status;                             
-    int val;
+    int retval;
     
     pthread_mutex_lock(&snmp_lock);
 
     sess_handle = snmp_open(&session);
-    
     init_snmp("MibCheck");
 
     snmp_sess_init( &session );
@@ -43,30 +42,23 @@ int doSnmpGet(const char *cur_oid, const char *ip, int *data_ptr) {
 
     pdu = snmp_pdu_create(SNMP_MSG_GET);
 
-//    read_objid("CISCO-PROCESS-MIB::cpmCPUTotal1minRev.1", id_oid, &id_len);
-    
     if( !snmp_parse_oid(cur_oid, id_oid, &id_len)) {
         cout << "snmp oid parsing failed"<<endl;
         return -1;
     }
     
-//    read_objid(cur_oid, id_oid, &id_len);
-
     snmp_add_null_var(pdu, id_oid, id_len);
 
     status = snmp_synch_response(sess_handle, pdu, &response);
-    
-
     if( status == 0) {
         for(vars = response->variables; vars; vars = vars->next_variable) {
                 *data_ptr = (int) *(vars->val.integer);
-                val = 0;
+                retval = SUCCESS;
                 break;
         }
     } else {
-        cout << "SNMP Get failed for switch IP :"<<ip<<" oid :"<<cur_oid<<endl;
         *data_ptr = -1;
-        val = -1;
+        retval = FAILURE;
     }
     
     snmp_free_pdu(response);
@@ -74,7 +66,7 @@ int doSnmpGet(const char *cur_oid, const char *ip, int *data_ptr) {
 
     pthread_mutex_unlock(&snmp_lock);
 
-    return val;
+    return retval;
 }
 
 
@@ -92,8 +84,8 @@ void SwitchDataBuffer::startDataCollection(void) {
     //connect to switch
     while(collect == true) {
         //Do SNMP get 
-        if ( doSnmpGet("CISCO-PROCESS-MIB::cpmCPUTotal1minRev.1", switch_ip.c_str(), &switch_data.cpu_rate) == -1
-            || doSnmpGet("CISCO-PROCESS-MIB::cpmCPUMemoryUsed.1", switch_ip.c_str(), &switch_data.cpu_mem_usage) == -1) {
+        if ( doSnmpGet("CISCO-PROCESS-MIB::cpmCPUTotal1minRev.1", switch_ip.c_str(), &switch_data.cpu_rate) == FAILURE
+            || doSnmpGet("CISCO-PROCESS-MIB::cpmCPUMemoryUsed.1", switch_ip.c_str(), &switch_data.cpu_mem_usage) == FAILURE) {
             wait = true;
         }
 
@@ -104,9 +96,7 @@ void SwitchDataBuffer::startDataCollection(void) {
             }
         }
 
-        if( hardLimitReached() || wait ) {
-            printBufferData();
-            getListOfDataAndFlush();
+        if( hardLimitReached() || wait == true ) {
             sleep(1);
             wait = false;
         }
@@ -125,10 +115,6 @@ int SwitchDataBuffer::addToBuffer(buf_data &data) {
     buf_data_node *buf = new buf_data_node;
     
     buf->data = data;
-/*
-    buf->data.cpu_rate = data.cpu_rate;
-    buf->data.cpu_mem_usage = data.cpu_mem_usage;
-*/
     if( cur_buffer_size == 0 || buf_hdr == NULL ) {
         buf_hdr = buf;
         buf_tail = buf;
@@ -183,7 +169,7 @@ void SwitchDataBuffer::printBufferData() {
         buf_data_node *tmp = buf_hdr;
         cout << endl<<switch_name<<":"<<switch_id<<":cur buffer size :"<<cur_buffer_size<<endl;
         do {
-            cout << "cpu usage :"<<tmp->data.cpu_rate<<" temp:"<<tmp->data.cpu_mem_usage<<endl;
+            cout << "cpu usage :"<<tmp->data.cpu_rate<<" cpu mem usage:"<<tmp->data.cpu_mem_usage<<endl;
             tmp = tmp->next;
         } while( tmp != buf_tail );
     }
@@ -223,3 +209,5 @@ void SwitchDataBuffer::removeAllFromBuffer() {
     }
     pthread_mutex_unlock(&lock);
 }
+
+

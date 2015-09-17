@@ -61,10 +61,5 @@ list<SwitchDataBuffer *> init_data_buffers() {
 
 int main()
 {
-    list<SwitchDataBuffer *> slist_data = init_data_buffers();
-
-    while(1) {}
     return 0;
 }
-
-
