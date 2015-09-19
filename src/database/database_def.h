@@ -18,7 +18,7 @@ class DB
 {
     private : unordered_map <int, set<int>>  group_to_client;
               unordered_map <int, set<int>>  client_to_group;
-              unordered_map <in_addr_t, int> client_ip_to_id;
+              unordered_map <int, in_addr_t> client_ip_to_id;
               unordered_map <int, bool> client_state;       //true free , false busy
               set <int> group_set;
 
@@ -42,8 +42,8 @@ class DB
               set<int> get_groups_for_client(int client_id);
               int remove_client_group(int client_id , int group_id);
               int remove_client(int client_id);
-              in_addr_t get_client_id_from_ip(int client_id);
-              int set_client_id_from_ip(in_addr_t);
+              in_addr_t get_client_ip_from_id(int client_id);
+              int set_client_id_from_ip(in_addr_t client_ip);
 
               // For client state 
               set<int> get_free_client_list(int group_id);
