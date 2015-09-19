@@ -11,23 +11,25 @@
 #define SUCCESS 0
 #define FAILURE -1
 
-#define STORE_LIMIT 128
-#define HARD_LIMIT 512
-#define MAX_DATA_BUFSZ 4096
+#define STORE_LIMIT 10
+#define HARD_LIMIT 20
+#define MAX_DATA_BUFSZ 40
 #define SNMP_COMMUNITY "demopublic"
 #define MAX_SWITCHES 10
 
+#define CPU_RATE 0
+#define CPU_MEM_USAGE 1
+#define MAX_PARAMS 2
+
 using namespace std;
 
-typedef struct buf_data_ {
-    int cpu_rate;
-    int cpu_mem_usage;
-} buf_data;
-
-typedef struct buf_data_node_ {
-    buf_data data;
-    buf_data_node_ *next;
-} buf_data_node;
+typedef struct buf_data_t_ {
+    int data[MAX_DATA_BUFSZ];
+    int head;
+    int tail;
+    int size;
+    pthread_mutex_t lock;
+} buf_data_t;
 
 
 class SwitchDataBuffer:public Thread {
@@ -35,27 +37,25 @@ class SwitchDataBuffer:public Thread {
         int switch_id;
         string switch_name;
         string switch_ip;
-        buf_data_node *buf_hdr;
-        buf_data_node *buf_tail;
-        int cur_buffer_size;
+        
+        buf_data_t buf[MAX_PARAMS];
+
         static int switch_count;
-        pthread_mutex_t lock;
         bool collect;
         
         struct snmp_session session;
         
         void startDataCollection(void);
-        int addToBuffer(buf_data &);
-        void removeAllFromBuffer();
         void snmpSessionInit();
+        void bufferAdd(buf_data_t *buf, int data);
 
     public:
         SwitchDataBuffer(string, string);
         void stopDataCollection(void);
-        bool storeLimitReached();
-        bool hardLimitReached();
-        list<buf_data> getListOfDataAndFlush();
         void printBufferData();
+        
+        int *getData(buf_data_t *buf);
+        bool bufLimitReached(buf_data_t *buf, int limit);
 
         virtual void run();
 };

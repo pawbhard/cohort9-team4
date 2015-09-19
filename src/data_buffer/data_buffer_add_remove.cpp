@@ -25,7 +25,7 @@ int doSnmpGet(const char *cur_oid, const char *ip, int *data_ptr) {
     size_t serial_len = MAX_OID_LEN;
 
     int status;                             
-    int retval;
+    int retval = FAILURE;
     
     pthread_mutex_lock(&snmp_lock);
 
@@ -74,93 +74,93 @@ void SwitchDataBuffer::stopDataCollection(void) {
     collect = false;
 }
 
+bool SwitchDataBuffer::bufLimitReached(buf_data_t *buf, int limit){
+    if(buf->size >= limit)
+        return true;
+    return false;
+}
+
+void SwitchDataBuffer::bufferAdd(buf_data_t *buf, int data) {
+    pthread_mutex_lock(&buf->lock);
+    
+    if( !bufLimitReached(buf, HARD_LIMIT)) {
+        buf->data[buf->tail] = data;
+        buf->tail = (buf->tail+1)%MAX_DATA_BUFSZ;
+        cout << "Inserted data "<<data<<" Head: "<<buf->head<<" Tail: "<<buf->tail<<endl;
+        buf->size++;
+    } else {
+        cout<<"Buffer Add failed due to hardlimit reached"<<endl;
+    }
+
+    pthread_mutex_unlock(&buf->lock);
+
+    if( bufLimitReached(buf, STORE_LIMIT)) {
+        int *tmp = getData(buf);
+        free(tmp);
+    }
+}
+
+int * SwitchDataBuffer::getData(buf_data_t *buf) {
+    
+    int i = 0;
+    
+    int *raw_buffer = NULL;
+
+    pthread_mutex_lock(&buf->lock);
+    if(buf->head == buf->tail) {
+        pthread_mutex_unlock(&buf->lock);
+        return NULL;
+    }
+    else {
+        if( bufLimitReached(buf, STORE_LIMIT)) {
+            raw_buffer = (int *)malloc(sizeof(int)*(STORE_LIMIT));
+            while(i < STORE_LIMIT) {
+                cout<<"Get Buf Data "<<buf->data[buf->head]<<" Head :"<<buf->head<<" Tail: "<<buf->tail<<endl;
+                raw_buffer[i] = buf->data[buf->head++];
+                buf->head = buf->head%MAX_DATA_BUFSZ;
+                buf->size--;
+                i++;           
+            }
+        }
+    }
+
+    pthread_mutex_unlock(&buf->lock);
+    return raw_buffer;
+}
 
 void SwitchDataBuffer::startDataCollection(void) {
 
-    buf_data switch_data;
     bool wait = false;
     collect = true;
+    
+    int data;
 
     //connect to switch
     while(collect == true) {
         //Do SNMP get 
-        if ( doSnmpGet("CISCO-PROCESS-MIB::cpmCPUTotal1minRev.1", switch_ip.c_str(), &switch_data.cpu_rate) == FAILURE
-            || doSnmpGet("CISCO-PROCESS-MIB::cpmCPUMemoryUsed.1", switch_ip.c_str(), &switch_data.cpu_mem_usage) == FAILURE) {
+        if ( doSnmpGet("CISCO-PROCESS-MIB::cpmCPUTotal1minRev.1", switch_ip.c_str(), &data) == SUCCESS) {
+            bufferAdd(&buf[CPU_RATE], data);
+        } else {
             wait = true;
+            cout << "SNMP Get failed CPU rate"<<endl;
         }
 
-        if( wait == false) {
-            if(addToBuffer(switch_data) != SUCCESS)
-            {
-                cout << "ALERT: Adding data to buffer failed"<<endl;
-            }
+        if(doSnmpGet("CISCO-PROCESS-MIB::cpmCPUMemoryUsed.1", switch_ip.c_str(), &data) == SUCCESS) {
+            bufferAdd(&buf[CPU_MEM_USAGE], data);
+        }
+        else {
+            wait = true;
+            cout << "SNMP Get failed CPU mem"<<endl;
         }
 
-        if( hardLimitReached() || wait == true ) {
+        if( wait == true ) {
             sleep(1);
             wait = false;
         }
     }
 }
 
-int SwitchDataBuffer::addToBuffer(buf_data &data) {
-    
-    pthread_mutex_lock(&lock);
-
-    if( cur_buffer_size >= MAX_DATA_BUFSZ ) {
-        cout << "ALERT: Max Buffer Limit reached for switch "<<switch_name<<endl;
-        return FAILURE;
-    }
-    
-    buf_data_node *buf = new buf_data_node;
-    
-    buf->data = data;
-    if( cur_buffer_size == 0 || buf_hdr == NULL ) {
-        buf_hdr = buf;
-        buf_tail = buf;
-    }
-    else {
-        buf_tail->next = buf;
-        buf_tail = buf;
-    }
-    buf->next = buf_hdr;
-
-    cur_buffer_size++;
-
-    if(cur_buffer_size >= STORE_LIMIT)
-        cout << "Buffer store limit reached/exceeded"<<endl;
-
-    pthread_mutex_unlock(&lock);
-    return SUCCESS;
-}
-
-list<buf_data> SwitchDataBuffer::getListOfDataAndFlush() {
-    
-    int count=0;
-
-    list<buf_data> buf_list;
-    buf_data_node *cur=NULL, *tmp = buf_hdr;
-
-    pthread_mutex_lock(&lock);
-    if(storeLimitReached()) {
-    
-        do { 
-            cur = tmp;
-            buf_list.push_back(tmp->data);
-            tmp = tmp->next;
-            delete cur;
-            cur_buffer_size--;
-            count++;        
-        } while( tmp != buf_tail && count < STORE_LIMIT);
-        
-        buf_hdr = tmp;
-        buf_tail->next = buf_hdr;
-
-    }
-    pthread_mutex_unlock(&lock);
-    return buf_list;
-}
-
+/*
 void SwitchDataBuffer::printBufferData() {
     
     if( buf_hdr == NULL || cur_buffer_size == 0 )
@@ -175,39 +175,4 @@ void SwitchDataBuffer::printBufferData() {
     }
 }
 
-bool SwitchDataBuffer::storeLimitReached() {
-
-    if(cur_buffer_size >= STORE_LIMIT-1)
-        return true;
-    return false;
-}
-
-bool SwitchDataBuffer::hardLimitReached() {
-    if(cur_buffer_size >= HARD_LIMIT-1)
-        return true;
-    return false;
-}
-
-
-void SwitchDataBuffer::removeAllFromBuffer() {
-    
-    pthread_mutex_lock(&lock);
-    if( buf_hdr == NULL )
-        cout << "list empty"<<endl;
-    else {
-        buf_data_node *cur, *tmp = buf_hdr;
-
-        do {
-            cur = tmp;
-            tmp = tmp->next;
-            delete cur;
-            cur_buffer_size--;
-        } while(tmp != buf_tail);
-
-        delete tmp;
-        cur_buffer_size--;
-    }
-    pthread_mutex_unlock(&lock);
-}
-
-
+*/

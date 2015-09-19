@@ -15,15 +15,19 @@ int SwitchDataBuffer::switch_count = 0;
 
 SwitchDataBuffer::SwitchDataBuffer(string sname, string ip)
 {
+    int i;
     if( switch_count < MAX_SWITCHES ){
         ++switch_count;
         switch_id = switch_count;
         switch_name = sname;
         switch_ip = ip;
-        buf_hdr = buf_tail = NULL;
-        cur_buffer_size = 0; 
-        if (pthread_mutex_init(&lock, NULL) != 0) {
-            cout<<"\nlock init failed\n";
+        
+        for( i=0; i<MAX_PARAMS; i++) {
+            bzero(&buf[i], sizeof(buf_data_t));
+
+            if (pthread_mutex_init(&buf[i].lock, NULL) != 0) {
+                cout<<"\nlock init failed\n";
+            }
         }
     }
     else {
@@ -35,8 +39,8 @@ SwitchDataBuffer::SwitchDataBuffer(string sname, string ip)
 void SwitchDataBuffer::run() {
     startDataCollection();
     
-    removeAllFromBuffer();
-    pthread_mutex_destroy(&lock);
+    for(int i=0; i<MAX_PARAMS; i++) 
+        pthread_mutex_destroy(&buf[i].lock);
 }
 
 
@@ -61,5 +65,7 @@ list<SwitchDataBuffer *> init_data_buffers() {
 
 int main()
 {
+    init_data_buffers();
+    while(1) { }
     return 0;
 }
