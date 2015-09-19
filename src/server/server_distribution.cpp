@@ -51,7 +51,27 @@ int get_data (char *data, int start, int end, int type)
 
 int get_group_id (int type, int task)
 {
-   
+    if (type == TEMP_DATA)
+    {
+       if (task == AVERAGE)
+          return 1;
+       else if (task == DEVIATION)
+          return 2;          
+    }
+    else if (type == CPU_DATA)
+    {
+       if (task == AVERAGE)
+          return 3;
+       else if (task == DEVIATION)
+          return 4;
+    }
+    else if (type == PKT_RATE_DATA)
+    {
+       if (task == AVERAGE)
+          return 5;
+       else if (task == DEVIATION)
+          return 6;
+    }   
 }
 
 int server_data_process (char *buffer, set <int> free_client_list , int start, int end, int grp_id, int task)
