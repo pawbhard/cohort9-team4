@@ -2,7 +2,7 @@
 
 unsigned int task_id = 1;
 
-int get_data (char *data, int start, int end, int type)
+int get_data (void)
 {
 
     int grp_id;
