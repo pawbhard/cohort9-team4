@@ -90,7 +90,6 @@ void SwitchDataBuffer::bufferAdd(buf_data_t *buf, int data) {
     if( !bufLimitReached(buf, HARD_LIMIT)) {
         buf->data[buf->tail] = data;
         buf->tail = (buf->tail+1)%MAX_DATA_BUFSZ;
-        cout << "Inserted data "<<data<<" Head: "<<buf->head<<" Tail: "<<buf->tail<<endl;
         buf->size++;
     } else {
         cout<<"Buffer Add failed due to hardlimit reached"<<endl;
@@ -115,7 +114,6 @@ int * SwitchDataBuffer::getData(buf_data_t *buf) {
         if( bufLimitReached(buf, STORE_LIMIT)) {
             raw_buffer = (int *)malloc(sizeof(int)*(STORE_LIMIT));
             while(i < STORE_LIMIT) {
-                cout<<"Get Buf Data "<<buf->data[buf->head]<<" Head :"<<buf->head<<" Tail: "<<buf->tail<<endl;
                 raw_buffer[i] = buf->data[buf->head++];
                 buf->head = buf->head%MAX_DATA_BUFSZ;
                 buf->size--;
