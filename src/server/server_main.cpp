@@ -7,14 +7,11 @@ using namespace std;
 
 extern list <SwitchDataBuffer *>init_data_buffers();
 
-void startServerDataCollection(list <SwitchDataBuffer *> switch_list) {
+void startServerDataCollection(list <SwitchDataBuffer *> &switch_list) {
     int *cpu_data;
     int i;
     
-    if( !switch_list.size() ) {
-        cout << "Switch list size : "<<switch_list.size()<<endl;
-        return;
-    }
+    cout << "Num Switches : "<<switch_list.size()<<endl;
 
     while(1) {
         for(list<SwitchDataBuffer *>::iterator it = switch_list.begin(); it != switch_list.end(); it++)
@@ -47,5 +44,5 @@ int main()
 {
     list <SwitchDataBuffer *>switch_list;
     switch_list = init_data_buffers();
-    startServer(switch_list);
+    startServerDataCollection(switch_list);
 }
