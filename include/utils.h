@@ -57,6 +57,7 @@ static inline char* get_date_time () {
 #define MSG_TYPE_MGROUP_JOIN_RESP 7
 #define MSG_TYPE_MGROUP_LEAVE_REQ 8 
 #define MSG_TYPE_MGROUP_LEAVE_RESP 9
+#define MSG_COMPUTE_TASK_OUTPUT 10
 
 
 #define ADVERT_REQ 1
