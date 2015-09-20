@@ -9,7 +9,7 @@
 #define TRUE 1
 #define FALSE 0
 #define BUFFER_SIZE 4096
-#define RESULT_SIZE 50
+#define RESULT_SIZE 3
 #define MAX_Tx_Rx_BUFFER 65534
 #define SUCCESS 0
 #define FAILURE 1 
@@ -21,7 +21,6 @@ typedef uint32_t syserr_t;
 
 enum task_type {
 	mean,
-	median,
 	standard_deviation,
 	range
 };
