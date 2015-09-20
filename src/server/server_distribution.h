@@ -5,7 +5,7 @@
 #define PKT_RATE_DATA 2
 
 typedef enum {
-    AVERAGE = 0,
+    MEAN = 0,
     DEVIATION = 1,
 
     NUM_OF_TASKS = 2,};

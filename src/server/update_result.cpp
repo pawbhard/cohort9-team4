@@ -1,13 +1,11 @@
-#include "server_collect.h"
+#include "update_result.h"
 
-using namespace std;
-
-float Result::update_avg(int total_num, float updated_answer, int num, float answer)
+void Result::update_mean(int num, double answer)
 {
-    float average;
+    double new_mean;
 
-    average = ((total_num * updated_answer) + (num * answer)) / (total_num + num);
-    return average;
+    new_mean = ((mean_final * mean_elements) + (answer * num)) / (mean_elements + num);
+
+    mean_elements += num;
+    mean_final = new_mean;
 }
-
-// TODO : 
