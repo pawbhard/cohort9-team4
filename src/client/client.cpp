@@ -190,8 +190,9 @@ server_connection_hndlr(char *server_ip)
    //char group_id[10];   
    //char message[MAX_Tx_Rx_BUFFER];
    uint32_t sock;
-   //pthread_t registeration_thread;
+   pthread_t registration_thread;
    pthread_t task_thread;
+  
 
    if(create_client_socket(server_ip)<0) {
        cout << "Failed to Create client Socket\n";
@@ -218,7 +219,11 @@ server_connection_hndlr(char *server_ip)
       exit(1);
    }
    
-   client_join_leave_mgroup_hndlr();
+   
+  if(!pthread_create(&registration_thread,NULL,&client_join_leave_mgroup_hndlr,(void*)NULL)) {
+    std::cout<<get_date_time()<<""Unable to create task thread\n";
+    return;
+  }
     
   if (!pthread_create(&task_thread, NULL, &client_receive_and_execute_task, (void*) &local_con_hndlr)) {
     std::cout << get_date_time() << "Unable to create task thread\n";
