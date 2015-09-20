@@ -42,9 +42,9 @@ void *client_receive_and_execute_task (void *v_connection) {
 	do {
 		std::cout << get_date_time() << " Waiting for data from server\n";
 		read (connection->local_fd, data, BUFFER_SIZE);
-		result[0] = data[1];
-		task = (task_type)data[2];
-		input_size = (int)data[0];
+		result[0] = data[0];
+		task = (task_type)data[1];
+		input_size = (int)data[2];
 		input = data+3;
     	switch (task) {
     		case mean: 		std::cout << get_date_time() << " Calculating mean of %d elements\n";
