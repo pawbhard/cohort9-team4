@@ -1,4 +1,4 @@
-
+#if 0
 #include"database_def.h"
 
 /* Contains following apis 
@@ -30,5 +30,5 @@ in_addr_t DB::get_client_ip_from_id(int client_id) {
     ip = ti.second;
     return ip;
 }
-
+#endif
 
