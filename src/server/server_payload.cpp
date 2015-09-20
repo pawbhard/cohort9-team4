@@ -22,8 +22,8 @@ int send_packet_payload(int socketfd, int opcode,char *buffer,int buffer_len,int
     memset(&msg, 0, sizeof(msg));
     
     //get clent ip from database 
-    DB db = DB::get_db_instance();
-    //in_addr_t client_ip = db.get_client_id_from_ip(client_id);
+    DB *db = DB::get_instance();
+//    in_addr_t client_ip = db.get_client_id_from_ip(client_id);
     in_addr_t client_ip; 
     sockaddr_in client_addr;
     memset(&client_addr,0,sizeof(client_addr));

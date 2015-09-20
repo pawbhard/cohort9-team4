@@ -11,6 +11,6 @@ int get_result(in_addr_t client_ip, int task_id, int task, int num, double answe
 
     int client_id = db->set_client_id_from_ip(client_ip);
 
-    td->get_track(client_id, p);
+//    td->get_track(client_id, p);
     //TODO : With the above p flush the buffer
 }

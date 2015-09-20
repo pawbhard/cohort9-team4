@@ -11,6 +11,7 @@ int get_data (int *data, size_t size, int type)
     int ret_val = SUCCESS;
     set <int> free_client_list;
     DB *db = DB::get_instance();
+    track_data *td = track_data::get_instance();
 
     for (int i = 0; i <= NUM_OF_TASKS; i++)
     {
@@ -62,11 +63,12 @@ int get_data (int *data, size_t size, int type)
             memcpy(arr+3, data+(size - cap), sizeof(int) * size_data);
             
             // calling back_up function
-            back_up_add_delete(task_id, *arr, 1);
+            back_up_add_delete(task_id, arr, 1);
         
             put = write(*it, (void*)arr, sizeof(arr));
             SERVER_DEBUG("Sending %d to client %d", put, *it );
-          
+
+            td->set_track(task_id, *it, (size - cap), ((size - cap) + size_data));          
             timer *t1;
             t1 = new timer(task_id, 100, handle_timer);
             t1->start();
@@ -79,7 +81,24 @@ int get_data (int *data, size_t size, int type)
 
 int get_group_id (int type, int task)
 {
-   
+    if (type == CPU_MEM_USAGE)
+    {
+        if (task == MEAN)
+           return 1;
+        else if (task == DEVIATION)
+           return 2;
+        else if (task == RANGE)
+           return 3;
+    }
+    else if (type == CPU_RATE)
+    {
+        if (task == MEAN)
+           return 4;
+        else if (task == DEVIATION)
+           return 5;
+        else if (task == RANGE)
+           return 6;
+    }
 }
 
 #if 0
@@ -172,10 +191,37 @@ int back_up_add_delete (int task_id, int *arr, int flag) //flag 0 del 1 add
 		for (int it = 0; it <= bk.size(); it++)
 		{
 			if (bk[it].id == task_id) {
-                            free(bk[it].arr);
+                                                      
+                            arr = bk[it].arr;
                             bk.erase(it + bk.begin());
 		         }  
 		}
 	}
 
 }
+
+void handle_timer(sigval s)
+{
+   track_data *td = track_data::get_instance();
+   int client_id;
+   int start;
+   int end;
+   int ret_val;
+   int *arr;
+   int put;
+
+   SERVER_DEBUG ("Timer fired for task id : %d", s.sival_int);
+   ret_val = td->get_track(s.sival_int, &client_id, &start, &end);
+
+   if (ret_val != SUCCESS)
+   {
+      back_up_add_delete(s.sival_int, arr, 0);   
+   }
+   else
+   {
+      back_up_add_delete(s.sival_int, arr, 0);
+      put = write(client_id, (void*)arr, sizeof(arr));
+      SERVER_DEBUG("Sending %d to client %d", put, client_id );
+   }
+   free (arr);
+} 

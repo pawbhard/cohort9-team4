@@ -34,8 +34,9 @@ typedef enum {
 
 int get_data (int *, int, int );
 int get_group_id (int , int );
-int server_data_process (char *, set <int> , int , int , int , int );
-int backup_info (int , int , int );
+//int server_data_process (char *, set <int> , int , int , int , int );
+int back_up_add_delete(int , int *, int );
+void handle_timer(sigval);
 //#define MEAN 0
 
 class Result

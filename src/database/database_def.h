@@ -46,8 +46,8 @@ class DB
               set<int> get_groups_for_client(int client_id);
               int remove_client_group(int client_id , int group_id);
               int remove_client(int client_id);
-              in_addr_t get_client_ip_from_id(int client_id);
-              int set_client_id_from_ip(in_addr_t client_ip);
+//              in_addr_t get_client_ip_from_id(int client_id);
+//              int set_client_id_from_ip(in_addr_t client_ip);
 
               // For client state 
               set<int> get_free_client_list(int group_id);
