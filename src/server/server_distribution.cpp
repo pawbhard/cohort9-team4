@@ -1,48 +1,76 @@
-#include "server_distribution.h"
+#include "server_header.h"
+#include "../common_util/timer.h"
 
 unsigned int task_id = 1;
+using namespace std;
 
-int get_data (char *data, int start, int end, int type)
+int get_data (int *data, size_t size, int type)
 {
 
     int grp_id;
-    int data_size = 0;
     int ret_val = SUCCESS;
     set <int> free_client_list;
-    DB db = DB::get_db_instance();
+    DB *db = DB::get_instance();
 
     for (int i = 0; i <= NUM_OF_TASKS; i++)
     {
         switch (type)
         {
-           case TEMP_DATA :
+/*           case TEMP_DATA :
            grp_id =  get_group_id (type, i);
-           free_client_list = db.get_free_client_list(grp_id);    
+           free_client_list = db->get_free_client_list(grp_id);    
+           break;
+*/
+           case CPU_MEM_USAGE :
+           grp_id =  get_group_id (type, i);
+           free_client_list = db->get_free_client_list(grp_id);
            break;
 
-           case CPU_DATA :
+           case CPU_RATE : 
            grp_id =  get_group_id (type, i);
-           free_client_list = db.get_free_client_list(grp_id);
-           break;
-
-           case PKT_RATE_DATA : 
-           grp_id =  get_group_id (type, i);
-           free_client_list = db.get_free_client_list(grp_id);
+           free_client_list = db->get_free_client_list(grp_id);
            break;
 
            default :
            cout << "Invalid type\n";
            return FAILURE;           
         }
-       
-        data_size = end - start;
-
-        // Calling server_data_process to process data and sent to client
-        ret_val = server_data_process (data, free_client_list, start, end, grp_id, i);      
-        if (ret_val != SUCCESS)
+    
+	if (free_client_list.size() == 0)
         {
-            cout << "Failed to process server data\n";
-        }                
+           SERVER_DEBUG ("No free clients, ignoring data");
+           free (data);
+           return FAILURE;
+        }   
+ 
+//	static int task
+        int size_data, put;
+        int *arr;
+        int cap = size;
+        int per_client = ceil((float)cap/(float)free_client_list.size());
+        set<int>::iterator it;
+        for(it = free_client_list.begin(); it != free_client_list.end(); ++it)
+        {
+            if (cap <= 0)
+                break;
+
+            size_data = cap > per_client ? per_client : cap;
+            arr = new int[size_data + 3];
+            arr[2] = size_data;
+            arr[0] = task_id;
+            arr[1] = i;
+            memcpy(arr+3, data+(size - cap), sizeof(int) * size_data);
+            
+            // calling back_up function
+            back_up_add_delete(task_id, *arr, 1);
+        
+            put = write(*it, (void*)arr, sizeof(arr));
+            SERVER_DEBUG("Sending %d to client %d", put, *it );
+          
+            timer *t1;
+            t1 = new timer(task_id, 100, handle_timer);
+            t1->start();
+        }
     }
     // TODO : Call timer function here
  
@@ -54,15 +82,18 @@ int get_group_id (int type, int task)
    
 }
 
+#if 0
 int server_data_process (char *buffer, set <int> free_client_list , int start, int end, int grp_id, int task)
 {
     int free_clients = 0, rem = 0, client_data_size = 0, data_size = 0;
     int i = 0;
-    int bk_start = 0; bk_end = 0;
+    int bk_start = 0; 
+    int bk_end = 0;
     int ret_val = SUCCESS;
     int opcode;
+    int rmd;
 
-    DB db == DB::get_db_instance();
+    DB *db = DB::get_instance();
 
     data_size = end - start;
     free_clients = free_client_list.size();
@@ -100,7 +131,7 @@ int server_data_process (char *buffer, set <int> free_client_list , int start, i
            return FAILURE;
        }
 
-       db.set_client_busy_free(client_id, FALSE);
+       db->set_client_busy_free(client_id, false);
        i++;
        task_id++;
     }  
@@ -115,7 +146,36 @@ int backup_info (int client_id, int start, int end)
    p->start = start;
    p->end = end;
 
-   track_data td = track_data::track_data_get_db_instance(); 
-   ret_val = td.set_track(client_id, p);
+   track_data *td = track_data::get_instance(); 
+   ret_val = td->set_track(client_id, *p);
    
+}
+#endif
+
+struct back_up {
+      int id;
+      int *arr;
+ };
+
+int back_up_add_delete (int task_id, int *arr, int flag) //flag 0 del 1 add
+{
+	static vector <back_up> bk;
+        if (flag)
+        {
+		back_up b;
+		b.id = task_id; b.arr = arr;
+      		bk.push_back(b);
+        } 
+	else
+	{
+                
+		for (int it = 0; it <= bk.size(); it++)
+		{
+			if (bk[it].id == task_id) {
+                            free(bk[it].arr);
+                            bk.erase(it + bk.begin());
+		         }  
+		}
+	}
+
 }

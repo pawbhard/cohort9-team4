@@ -1,14 +1,16 @@
-#include "server_collect.h"
+#include "server_header.h"
 
 int get_result(in_addr_t client_ip, int task_id, int task, int num, double answer)
 {
-    DB db = DB::get_db_instance();
-    Result result = Result::get_instance();
+    position *p;
+    DB *db = DB::get_instance();
+    track_data *td = track_data::get_instance();
+    Result *result = Result::get_instance();
 
-    result.update_result (task, num, answer);
+    result->update_result (task, num, answer);
 
-    int client_id = db.get_client_id_from_ip(client_ip);
+    int client_id = db->set_client_id_from_ip(client_ip);
 
-    get_track(client_id, p);
+    td->get_track(client_id, p);
     //TODO : With the above p flush the buffer
 }

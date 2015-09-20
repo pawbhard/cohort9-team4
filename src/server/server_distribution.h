@@ -1,4 +1,4 @@
-
+#include "../database/database_def.h"
 
 #define TEMP_DATA 0
 #define CPU_DATA  1
