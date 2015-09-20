@@ -1,22 +1,7 @@
-#include<iostream>
-#include<stdio.h>
-#include<string.h>    //strlen
-#include<stdlib.h>    //strlen
-#include<sys/socket.h>
-#include<arpa/inet.h> //inet_addr
-#include<unistd.h>    //write
-#include<pthread.h> //for threading , link with lpthread
-#include<stdint.h>
-#include<netinet/in.h>
-#include<netdb.h>
-#include<stdlib.h>
-
-#include "common_utils.h"
-#include "client.h"
-
-
+#include "../../include/client.h"
 
 using namespace std;
+struct g_conn_hndl_t local_con_hndlr;
 uint32_t
 get_local_sock_fd ()
 {
@@ -29,8 +14,8 @@ set_server_addr(char *server_ip)
    local_con_hndlr.server_addr.sin_addr.s_addr = inet_addr(server_ip);
    local_con_hndlr.server_addr.sin_family      = AF_INET;
    local_con_hndlr.server_addr.sin_port        = htons(SERVER_PORT);
+   return SUCCESS;
 }
-
 
 syserr_t
 create_client_socket(char *server_ip)
@@ -43,8 +28,6 @@ create_client_socket(char *server_ip)
    }
    return SUCCESS;
 }
-
-
 
 syserr_t
 server_handshake()
@@ -204,9 +187,11 @@ client_join_leave_mgroup_hndlr()
 syserr_t 
 server_connection_hndlr(char *server_ip) 
 {
-   char group_id[10];   
-   char message[MAX_Tx_Rx_BUFFER];
+   //char group_id[10];   
+   //char message[MAX_Tx_Rx_BUFFER];
    uint32_t sock;
+   //pthread_t registeration_thread;
+   pthread_t task_thread;
 
    if(create_client_socket(server_ip)<0) {
        cout << "Failed to Create client Socket\n";
@@ -234,7 +219,13 @@ server_connection_hndlr(char *server_ip)
    }
    
    client_join_leave_mgroup_hndlr();
-       
+    
+  if (!pthread_create(&task_thread, NULL, &client_receive_and_execute_task, (void*) &local_con_hndlr)) {
+    std::cout << get_date_time() << "Unable to create task thread\n";
+    return FAILURE; 
+  }       
+  pthread_join (task_thread, NULL);
+  return SUCCESS;
 }
    
 

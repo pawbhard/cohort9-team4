@@ -27,8 +27,8 @@ DATABUFFER = data_buffer
 #Client and Server compilation
 all: $(CLIENT) $(SERVER)
 
-$(CLIENT): src/$(CLIENT)/client_infra.cpp
-	$(COMPILER) -std=$(STANDARD) $(C_FLAGS) -o bin/$(CLIENT) src/$(CLIENT)/client_infra.cpp src/$(CLIENT)/client_leave_join_group.cpp src/$(CLIENT)/client_connection.cpp src/$(CLIENT)/client_task_execute.cpp
+$(CLIENT): src/$(CLIENT)/client.cpp
+	$(COMPILER) -std=$(STANDARD) $(C_FLAGS) -o bin/$(CLIENT) src/$(CLIENT)/client.cpp  src/$(CLIENT)/client_task_execute.cpp
 
 $(SERVER): src/$(SERVER)/server_main.cpp
 	$(COMPILER) -std=$(STANDARD) $(C_FLAGS) -o bin/$(SERVER) src/$(SERVER)/server_main.cpp src/$(SERVER)/server_collect.cpp src/$(SERVER)/server_distribution.cpp src/$(SERVER)/server_payload.cpp src/$(SERVER)/server_register_handler.cpp src/$(SERVER)/threadpool.cpp src/$(SERVER)/update_result.cpp src/$(SERVER)/timer.cpp src/$(DATABASE)/database_main.cpp src/$(DATABASE)/database_track_client.cpp src/$(DATABASE)/database_client_mapping.cpp src/$(DATABASE)/database_client_state.cpp src/$(DATABASE)/database_display.cpp src/$(DATABUFFER)/data_buffer_add_remove.cpp src/$(DATABUFFER)/data_buffer_init.cpp src/$(DATABUFFER)/thread_common.cpp 
