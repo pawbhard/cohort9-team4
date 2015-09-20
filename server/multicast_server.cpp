@@ -193,6 +193,13 @@ void *register_client(struct client_sock_fd_t client_desc,client_server_msg_t cl
          puts(stdout_msg);
          break;
 
+     case MSG_TYPE_COMPUTE_TASK_OUTPUT:
+	 sprintf(stdout_msg,"\n%s:%s:Received Compute Task Output \n",ctime(&client_join_leave_time),client_info.client_ip); 
+         int *Task_output;  
+         Task_output =(int 
+         
+          
+
         
     }
 }
