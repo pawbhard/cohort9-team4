@@ -26,7 +26,7 @@ int doSnmpGet(const char *cur_oid, const char *ip, int *data_ptr) {
     size_t serial_len = MAX_OID_LEN;
 
     int status;                             
-    int retval = FAILURE;
+    int retval = FAIL;
     
     pthread_mutex_lock(&snmp_lock);
 
@@ -54,12 +54,12 @@ int doSnmpGet(const char *cur_oid, const char *ip, int *data_ptr) {
     if( status == 0) {
         for(vars = response->variables; vars; vars = vars->next_variable) {
                 *data_ptr = (int) *(vars->val.integer);
-                retval = SUCCESS;
+                retval = SUC;
                 break;
         }
     } else {
         *data_ptr = -1;
-        retval = FAILURE;
+        retval = FAIL;
     }
     
     snmp_free_pdu(response);
@@ -140,12 +140,12 @@ void SwitchDataBuffer::startDataCollection(void) {
     int data,retval;
     
     //Threadpool for data 
-    threadpool t;
+    thread_pool t;
     
     //connect to switch
     while(collect == true) {
         //Do SNMP get 
-        if ( doSnmpGet("CISCO-PROCESS-MIB::cpmCPUTotal1minRev.1", switch_ip.c_str(), &data) == SUCCESS) {
+        if ( doSnmpGet("CISCO-PROCESS-MIB::cpmCPUTotal1minRev.1", switch_ip.c_str(), &data) == SUC) {
             retval = bufferAdd(&buf[CPU_RATE], data);
         } else {
             retval = bufferAdd(&buf[CPU_RATE], rand()%100);
@@ -153,15 +153,15 @@ void SwitchDataBuffer::startDataCollection(void) {
         
         if(retval == -1) {
             cout<<"Buffer MAXLIMIT reached Dispatching to clints "<<endl;
-            int *tmp_buf = buf[CPU_RATE]->data;
+            int *tmp_buf = buf[CPU_RATE].data;
 
-            buf[CPU_RATE]->data = (int *)malloc(sizeof(int)*MAX_DATA_BUFSZ);
+            buf[CPU_RATE].data = (int *)malloc(sizeof(int)*MAX_DATA_BUFSZ);
             ///Defination in server_dispatch 
             t.submit(dispatch_routine_cpu_rate, (void *) tmp_buf);
         }
 
 
-        if(doSnmpGet("CISCO-PROCESS-MIB::cpmCPUMemoryUsed.1", switch_ip.c_str(), &data) == SUCCESS) {
+        if(doSnmpGet("CISCO-PROCESS-MIB::cpmCPUMemoryUsed.1", switch_ip.c_str(), &data) == SUC) {
             retval = bufferAdd(&buf[CPU_MEM_USAGE], data);
         }
         else {
@@ -170,9 +170,9 @@ void SwitchDataBuffer::startDataCollection(void) {
 
         if(retval == -1) {
             cout<<"Buffer MAXLIMIT reached Dispatching to clints "<<endl;
-            int *tmp_buf = buf[CPU_MEM_USAGE]->data;
+            int *tmp_buf = buf[CPU_MEM_USAGE].data;
 
-            buf[CPU_MEM_USAGE]->data = (int *)malloc(sizeof(int)*MAX_DATA_BUFSZ);
+            buf[CPU_MEM_USAGE].data = (int *)malloc(sizeof(int)*MAX_DATA_BUFSZ);
             ///Defination in server_dispatch 
             t.submit(dispatch_routine_cpu_usage,(void *)tmp_buf);
         }
@@ -181,7 +181,6 @@ void SwitchDataBuffer::startDataCollection(void) {
 
 
 void dispatch_routine_cpu_usage( void *arg) {
-{
     get_data((int *) arg, MAX_DATA_BUFSZ,CPU_MEM_USAGE);
 }
 void dispatch_routine_cpu_rate(void *arg) {

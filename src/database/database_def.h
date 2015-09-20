@@ -58,5 +58,7 @@ class DB
               void display_client_to_group();
               void display_group_to_client();
               void display_all();
+
+              int get_opcode(int task_id);
 };
 

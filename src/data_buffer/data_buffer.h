@@ -2,14 +2,15 @@
 #define data_buffer_h
 
 #include <string>
+#include "../common_util/threadpool.h"
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 
 #include "thread_common.h"
 
-#define SUCCESS 0
-#define FAILURE -1
+#define SUC 0
+#define FAIL -1
 
 #define STORE_LIMIT 10
 #define HARD_LIMIT 20
@@ -45,7 +46,7 @@ class SwitchDataBuffer:public Thread {
         bool collect;
         void startDataCollection(void);
         void snmpSessionInit();
-        void bufferAdd(buf_data_t *buf, int data);
+        int bufferAdd(buf_data_t *buf, int data);
 
     public:
         SwitchDataBuffer(string, string);
