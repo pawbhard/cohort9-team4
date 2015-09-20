@@ -22,7 +22,10 @@ set<int> DB::get_free_client_list(int group_id)
         }
 
         if(it->second == true) //true means free
-            free_client.insert(it->first);
+        { 
+           free_client.insert(it->first);
+           set_client_busy_free(it->first, false);
+        }
     }
     
     return free_client;
@@ -48,3 +51,18 @@ int DB::add_new_client_state(int client_id) //by default state is free
     client_state.insert( pair<int, bool> (client_id, true));
     return SUCCESS;
 }
+
+//int set_opcode_task(int task_id, int opcode);
+//              int get_opcode(int task_id);
+
+int DB::set_opcode_task(int task_id, int opcode)
+{
+   task_opcode.insert({task_id, opcode});
+}
+
+int DB::get_opcode(int task_id)
+{
+   unordered_map<int, int> ::iterator it = task_opcode.find(task_id);
+   return it->second;
+}
+

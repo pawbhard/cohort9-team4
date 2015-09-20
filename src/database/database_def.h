@@ -20,6 +20,7 @@ class DB
               unordered_map <int, set<int>>  client_to_group;
               unordered_map <int, in_addr_t> client_ip_to_id;
               unordered_map <int, bool> client_state;       //true free , false busy
+              unordered_map <int, int> task_opcode;
               set <int> group_set;
 
               DB()
@@ -59,6 +60,7 @@ class DB
               void display_group_to_client();
               void display_all();
 
+              int set_opcode_task(int task_id, int opcode);
               int get_opcode(int task_id);
 };
 
