@@ -22,10 +22,10 @@ int send_packet_payload(int socketfd, int opcode,char *buffer,int buffer_len,int
 int get_result(in_addr_t, int, int, int, double);
 
 //#define TEMP_DATA 0
-#define CPU_MEM_USAGE  0
-#define CPU_RATE 1
+#define CPU_MEM_USAGE 1
+#define CPU_RATE 0
 
-typedef enum {
+ enum {
     MEAN = 0,
     DEVIATION = 1,
     RANGE = 2,
