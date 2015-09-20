@@ -3,6 +3,10 @@
 
 #include "../data_buffer/data_buffer.h"
 
+Result *Result::result = NULL;
+DB *DB::db = NULL;
+track_data *track_data::td = NULL;
+
 using namespace std;
 
 extern list <SwitchDataBuffer *>init_data_buffers();

@@ -1,2 +1,3 @@
 
-int get_result(in_addr_t , int , int , int , float);
+
+int get_result(in_addr_t, int, int, int, double);

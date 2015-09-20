@@ -1,6 +1,7 @@
 #include "database_def.h"
 
 typedef struct {
+    int client_id;
     int start;
     int end;
 } position;
@@ -13,11 +14,16 @@ class track_data {
             DATABASE_DEBUG("Created Object of track_data");
         }
 
-    public  : static track_data get_db_instance(void)
-              {
-                  static track_data db;                  
-                  return db;
-              }
-             int set_track(int client_id, position p);
-             int get_track(int client_id , position *p);
+        static track_data *td;
+        track_data ( track_data const& ) {};
+        track_data& operator = ( track_data const& ) {};
+
+    public :
+        static track_data* get_instance()
+        {
+            if (!td) td = new track_data;
+            return td;
+        }   
+        int set_track(int task_id, int client_id, int s, int e);
+        int get_track(int task_id, int *client_id, int *s ,int *e);
 };
