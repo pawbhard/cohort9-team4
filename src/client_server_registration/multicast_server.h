@@ -7,8 +7,8 @@ typedef uint32_t syserr_t;
 
 typedef enum multicast_group_ {
     MEAN,
-    MEDIAN,
-    MODE
+    DEVIATION,
+    RANGE
 } multicast_group_t;
 
 struct g_server_sock_t 
