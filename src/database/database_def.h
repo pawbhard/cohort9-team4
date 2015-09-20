@@ -27,13 +27,17 @@ class DB
                   DATABASE_DEBUG("Created Object of database");
               }
 
+              static DB *db;
+              DB ( DB const& ) {};
+              DB& operator = ( DB const& ) {};
+
               int add_new_client_state(int client_id);
     
-    public  : static DB get_db_instance(void)
+    public  : static DB* get_instance ()
               {
-                  static DB db;                  
-                  return db;
-              }
+                 if (!db) db = new DB;
+                 return db;
+              }  
             
               //APIs (All are made int to return error )
               int add_group(int group_id);
