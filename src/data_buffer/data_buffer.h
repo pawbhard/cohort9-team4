@@ -61,6 +61,6 @@ class SwitchDataBuffer:public Thread {
 };
 
 
-
-
+void dispatch_routine_cpu_usage( void *arg);
+    void dispatch_routine_cpu_rate(void *arg); 
 #endif
