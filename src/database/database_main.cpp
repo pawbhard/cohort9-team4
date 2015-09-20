@@ -65,6 +65,9 @@ int DB::add_client_group(int client_id, int group_id)
         DATABASE_DEBUG("Previous mapping found Appending value");
         it->second.insert(group_id); // as it is set duplicates will be removed accordingly
     }
+    
+    DATABASE_DEBUG("Creating new Client state mapping");
+    add_new_client_state(client_id);
 
     return SUCCESS;
 }
@@ -121,6 +124,9 @@ int DB::remove_client(int client_id)
     
     //Delete from client_to_group    
     client_to_group.erase(client_id);
+
+    //DELETING FROM CLIENT_STATE database 
+    client_state.erase(client_id);
 
     return SUCCESS;
 }

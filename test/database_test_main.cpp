@@ -1,4 +1,4 @@
-#include "../database/database_def.h"
+#include "../src/database/database_def.h"
 
 
 int main()
@@ -20,7 +20,9 @@ int main()
     d.add_client_group(600,2);
     d.add_client_group(700,7);
     d.add_client_group(500,3);
-
+    d.add_client_group(200,7);
+    d.add_client_group(800,7);
+    d.add_client_group(900,7);
     d.display_all();
 
     d.remove_client_group(700,7);
@@ -34,6 +36,18 @@ int main()
     d.add_client_group(800,2);
 
     d.display_all();
+    
+    d.set_client_busy_free(800,false);
+    
+    set<int> free_clients = d.get_free_client_list(7);
+    set<int>::iterator it;
+    //display free clients
+    cout<<"Displaying free clients for group 7 : ";
+    for (it=free_clients.begin(); it!=free_clients.end(); ++it)
+    {
+        cout<<"  --> "<<*it;
+    }
+    cout<<"\n";
 
     d.remove_client(800);
 
