@@ -21,10 +21,10 @@ struct client_sock_fd_t
 {
     uint32_t client_sock;
     char     client_ip[INET6_ADDRSTRLEN];
-    uint32_t client_id;
 };
 
 struct client_sock_fd_t g_client_sock_info[1000];
+uint32_t client_id;
 
 
 struct g_server_sock_t server_sock_hndl;
