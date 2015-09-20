@@ -1,4 +1,4 @@
-nclude <signal.h>
+#include <signal.h>
 #include <time.h>
 #include <pthread.h>
 #include <iostream>
