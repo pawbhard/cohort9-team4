@@ -1,96 +1,81 @@
-#ifndef _H_THREADPOOL
-#define _H_THREADPOOL
+#include<mutex>
+#include<atomic>
+#include<queue>
+#include<memory>
+#include<mutex>
+#include<condition_variable>
+#include<thread>
+#include<boost/bind.hpp>
+#include<boost/function/function0.hpp>
 
-#include <pthread.h>
-
-#include <deque>
-#include <iostream>
-#include <vector>
+typedef boost::function0<void> Taskfunc;
 
 using namespace std;
 
-const int DEFAULT_POOL_SIZE = 10;
-const int STARTED = 0;
-const int STOPPED = 1;
-
-class Mutex
-{
-public:
-  Mutex()
-  {
-    pthread_mutex_init(&m_lock, NULL);
-    is_locked = false;
-  }
-  ~Mutex()
-  {
-    while(is_locked);
-    unlock(); // Unlock Mutex after shared resource is safe
-    pthread_mutex_destroy(&m_lock);
-  }
-  void lock()
-  {
-    pthread_mutex_lock(&m_lock);
-    is_locked = true;
-  }
-  void unlock()
-  {
-    is_locked = false; // do it BEFORE unlocking to avoid race condition
-    pthread_mutex_unlock(&m_lock);
-  }
-  pthread_mutex_t* get_mutex_ptr()
-  {
-    return &m_lock;
-  }
-private:
-  pthread_mutex_t m_lock;
-  volatile bool is_locked;
-};
-
-class CondVar
-{
-public:
-  CondVar() { pthread_cond_init(&m_cond_var, NULL); }
-  ~CondVar() { pthread_cond_destroy(&m_cond_var); }
-  void wait(pthread_mutex_t* mutex) {pthread_cond_wait(&m_cond_var, mutex); }
-  void signal() { pthread_cond_signal(&m_cond_var); }
-  void broadcast() { pthread_cond_broadcast(&m_cond_var); }
-private:
-  pthread_cond_t m_cond_var;
-};
-
-//template<class TClass>
-class Task
-{
-public:
-//  Task(TCLass::* obj_fn_ptr); // pass an object method pointer
-  Task(void (*fn_ptr)(void*), void* arg); // pass a free function pointer
-  ~Task();
-  void operator()();
-  void run();
-private:
-//  TClass* _obj_fn_ptr;
-  void (*m_fn_ptr)(void*);
-  void* m_arg;
-};
-
-class ThreadPool
-{
-public:
-  ThreadPool();
-  ThreadPool(int pool_size);
-  ~ThreadPool();
-  int initialize_threadpool();
-  int destroy_threadpool();
-  void* execute_thread();
-  int add_task(Task* task);
-private:
-  int m_pool_size;
-  Mutex m_task_mutex;
-  CondVar m_task_cond_var;
-  std::vector<pthread_t> m_threads; // storage for threads
-  std::deque<Task*> m_tasks;
-  volatile int m_pool_state;
+template<typename T>
+class threadsafe_queue {
+    private:
+        mutable mutex mut;
+        queue<T> data_q;
+        condition_variable data_cond;
+    public:
+        threadsafe_queue()  {
+        }
+        threadsafe_queue(threadsafe_queue const& other_q) {
+            lock_guard<mutex> lk(other_q.mut);
+            data_q = other_q.data_q;
+        }
+        void push(T new_value) ;
+        void wait_and_pop(T& value) ;
+        shared_ptr<T> wait_and_pop() ;
+        bool try_pop(T& value) ;
+        shared_ptr<T> try_pop() ;
+        bool empty() const ;
 };
 
 
-#endif /* _H_THREADPOOL */
+
+class join_threads {
+    std::vector<std::thread>& threads;
+    
+public:
+    explicit join_threads(std::vector<std::thread> & threads_) :                threads(threads_) {}  
+    ~join_threads() {
+
+        for(unsigned long i = 0; i<threads.size() ; ++i) {
+            if(threads[i].joinable())
+                threads[i].join();
+        }
+    }   
+};
+
+
+class thread_pool { 
+    std::atomic_bool done;
+    threadsafe_queue<Taskfunc> work_queue;
+    std::vector<std::thread> threads;
+    join_threads joiner;
+
+    void worker_thread(); 
+public:
+    thread_pool(): done(false), joiner(threads) {
+        unsigned const thread_count = 3;
+        try {
+            for(unsigned i = 0; i<thread_count;++i) {
+                threads.push_back(
+                    std::thread(&thread_pool::worker_thread,this));
+            }
+        } catch (...) {
+            done = true;
+            throw;
+        }
+    }
+    ~thread_pool() {
+        done = true;
+    }
+
+    void submit(void (*f)(void *), void * arg);
+};
+
+
+
