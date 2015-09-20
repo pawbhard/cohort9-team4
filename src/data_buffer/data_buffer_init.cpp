@@ -24,7 +24,9 @@ SwitchDataBuffer::SwitchDataBuffer(string sname, string ip)
         
         for( i=0; i<MAX_PARAMS; i++) {
             bzero(&buf[i], sizeof(buf_data_t));
-
+            
+            buf[i].data = (int *)malloc(MAX_DATA_BUFSZ*sizeof(int));
+            buf[i].type = i;
             if (pthread_mutex_init(&buf[i].lock, NULL) != 0) {
                 cout<<"\nlock init failed\n";
             }
@@ -56,12 +58,13 @@ list<SwitchDataBuffer *> init_data_buffers() {
     for ( int i=0; i<num_switches; i++ )
     {
         SwitchDataBuffer *sdbuf = new SwitchDataBuffer(conf_arr[i][0], conf_arr[i][1]);
-        switch_list.push_back(sdbuf);
         sdbuf->start();
+        switch_list.push_back(sdbuf);
     }
 
     return switch_list;
 }
+
 
 int main()
 {
@@ -69,3 +72,4 @@ int main()
     while(1) { }
     return 0;
 }
+

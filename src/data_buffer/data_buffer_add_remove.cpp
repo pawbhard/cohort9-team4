@@ -38,7 +38,7 @@ int doSnmpGet(const char *cur_oid, const char *ip, int *data_ptr) {
     session.community_len = strlen(SNMP_COMMUNITY);
     session.peername = (char *)ip;
 
-    add_mibdir(".");
+    add_mibdir("../data_buffer");
 
     pdu = snmp_pdu_create(SNMP_MSG_GET);
 
@@ -74,30 +74,43 @@ void SwitchDataBuffer::stopDataCollection(void) {
     collect = false;
 }
 
+buf_data_t* SwitchDataBuffer::getBuffer(int type) {
+    return &buf[type];
+}
+
 bool SwitchDataBuffer::bufLimitReached(buf_data_t *buf, int limit){
     if(buf->size >= limit)
         return true;
     return false;
 }
 
+void SwitchDataBuffer::bufferFree(int *buf) {
+    if(buf) {
+        free(buf);
+    }
+}
+
 void SwitchDataBuffer::bufferAdd(buf_data_t *buf, int data) {
     pthread_mutex_lock(&buf->lock);
     
-    if( !bufLimitReached(buf, HARD_LIMIT)) {
+    if( !bufLimitReached(buf, MAX_DATA_BUFSZ-1)) {
         buf->data[buf->tail] = data;
         buf->tail = (buf->tail+1)%MAX_DATA_BUFSZ;
-        cout << "Inserted data "<<data<<" Head: "<<buf->head<<" Tail: "<<buf->tail<<endl;
         buf->size++;
-    } else {
-        cout<<"Buffer Add failed due to hardlimit reached"<<endl;
+    }  
+    else {
+        cout<<"Buffer Add failed due to MAXLIMIT reached"<<endl;
+        int *tmp_buf = buf->data;
+
+        buf->data = (int *)malloc(sizeof(int)*MAX_DATA_BUFSZ);
+        pthread_mutex_unlock(&buf->lock);
+        ///Pawan TBD
+        ///dispatch_server(tmp_buf, buf.type);
+        return;    
     }
 
     pthread_mutex_unlock(&buf->lock);
 
-    if( bufLimitReached(buf, STORE_LIMIT)) {
-        int *tmp = getData(buf);
-        free(tmp);
-    }
 }
 
 int * SwitchDataBuffer::getData(buf_data_t *buf) {
@@ -115,7 +128,6 @@ int * SwitchDataBuffer::getData(buf_data_t *buf) {
         if( bufLimitReached(buf, STORE_LIMIT)) {
             raw_buffer = (int *)malloc(sizeof(int)*(STORE_LIMIT));
             while(i < STORE_LIMIT) {
-                cout<<"Get Buf Data "<<buf->data[buf->head]<<" Head :"<<buf->head<<" Tail: "<<buf->tail<<endl;
                 raw_buffer[i] = buf->data[buf->head++];
                 buf->head = buf->head%MAX_DATA_BUFSZ;
                 buf->size--;
@@ -130,7 +142,6 @@ int * SwitchDataBuffer::getData(buf_data_t *buf) {
 
 void SwitchDataBuffer::startDataCollection(void) {
 
-    bool wait = false;
     collect = true;
     
     int data;
@@ -141,22 +152,16 @@ void SwitchDataBuffer::startDataCollection(void) {
         if ( doSnmpGet("CISCO-PROCESS-MIB::cpmCPUTotal1minRev.1", switch_ip.c_str(), &data) == SUCCESS) {
             bufferAdd(&buf[CPU_RATE], data);
         } else {
-            wait = true;
-            cout << "SNMP Get failed CPU rate"<<endl;
+            bufferAdd(&buf[CPU_RATE], rand()%100);
         }
 
         if(doSnmpGet("CISCO-PROCESS-MIB::cpmCPUMemoryUsed.1", switch_ip.c_str(), &data) == SUCCESS) {
             bufferAdd(&buf[CPU_MEM_USAGE], data);
         }
         else {
-            wait = true;
-            cout << "SNMP Get failed CPU mem"<<endl;
+            bufferAdd(&buf[CPU_MEM_USAGE], rand()%100000);
         }
 
-        if( wait == true ) {
-            sleep(1);
-            wait = false;
-        }
     }
 }
 

@@ -24,10 +24,11 @@
 using namespace std;
 
 typedef struct buf_data_t_ {
-    int data[MAX_DATA_BUFSZ];
+    int *data;
     int head;
     int tail;
     int size;
+    int type;
     pthread_mutex_t lock;
 } buf_data_t;
 
@@ -42,9 +43,6 @@ class SwitchDataBuffer:public Thread {
 
         static int switch_count;
         bool collect;
-        
-        struct snmp_session session;
-        
         void startDataCollection(void);
         void snmpSessionInit();
         void bufferAdd(buf_data_t *buf, int data);
@@ -54,9 +52,11 @@ class SwitchDataBuffer:public Thread {
         void stopDataCollection(void);
         void printBufferData();
         
+        buf_data_t * getBuffer(int type);
+
         int *getData(buf_data_t *buf);
         bool bufLimitReached(buf_data_t *buf, int limit);
-
+        void bufferFree(int *);
         virtual void run();
 };
 
