@@ -101,11 +101,15 @@ void SwitchDataBuffer::bufferAdd(buf_data_t *buf, int data) {
     else {
         cout<<"Buffer Add failed due to MAXLIMIT reached"<<endl;
         int *tmp_buf = buf->data;
+        int tmp_tail = buf->tail;
+        int tmp_head = buf->head;
 
         buf->data = (int *)malloc(sizeof(int)*MAX_DATA_BUFSZ);
+        buf->head = buf->tail = 0;
+
         pthread_mutex_unlock(&buf->lock);
         ///Pawan TBD
-        ///dispatch_server(tmp_buf, buf.type);
+        ///dispatch_server(tmp_buf, tmp_head, tmp_tail, buf.type);
         return;    
     }
 
