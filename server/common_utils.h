@@ -29,5 +29,5 @@ typedef uint32_t syserr_t;
 typedef struct client_server_msg_ { 
 uint32_t cs_msg_type;
 char    cs_payload[MAX_Tx_Rx_BUFFER];
-uint32   cs_comput_output[3];
+uint32_t   cs_comput_output[3];
 }client_server_msg_t;
