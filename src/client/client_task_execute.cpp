@@ -58,6 +58,7 @@ extern void *client_receive_and_execute_task (void* temp_con){
     						break;
     		default:		continue;
     	}
+    	data.cs_msg_type = MSG_COMPUTE_TASK_OUTPUT;
     	write (local_con_hndlr->local_fd, &data, MESSAGE_SIZE);
 	} while (flag);
 	return NULL;
