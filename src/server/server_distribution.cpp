@@ -211,7 +211,7 @@ void handle_timer(sigval s)
    int put;
 
    SERVER_DEBUG ("Timer fired for task id : %d", s.sival_int);
-   ret_val = td->get_track(int s.sival_int, int client_id, int start, int end);
+   ret_val = td->get_track(s.sival_int, &client_id, &start, &end);
 
    if (ret_val != SUCCESS)
    {
