@@ -1,6 +1,7 @@
 #include "database_def.h"
 
 typedef struct {
+    int client_id;
     int start;
     int end;
 } position;
@@ -23,6 +24,6 @@ class track_data {
             if (!td) td = new track_data;
             return td;
         }   
-        int set_track(int client_id, position p);
-        int get_track(int client_id , position *p);
+        int set_track(int task_id, int client_id, int s, int e);
+        int get_track(int task_id, int *client_id, int *s ,int *e);
 };
