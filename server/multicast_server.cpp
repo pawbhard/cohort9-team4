@@ -11,6 +11,7 @@
 #include<netdb.h>
 #include<stdlib.h>
 #include<time.h>
+#include<fcntl.h>
 
 #include"common_utils.h"
 #include"multicast_server.h"
@@ -69,7 +70,7 @@ void incr_client_cnt()
 void add_client_sock_info(client_sock_fd_t* client_sock_info)
 {
   g_client_sock_info[client_id-1].client_sock=client_sock_info->client_sock;
-  g_client_sock_info[client_id-1].client_ip = client_sock_info->client_ip;
+  strcpy(g_client_sock_info[client_id-1].client_ip,client_sock_info->client_ip);
 }
 
 client_sock_fd_t  get_client_sock_info(uint32_t sock) 
@@ -116,22 +117,21 @@ client_server_handshake_init(struct client_sock_fd_t * client_sock_hndlr)
 }
 
 
-void *register_client(void *client_desc,client_server_msg_t client_req_msg)
+void *register_client(struct client_sock_fd_t client_desc,client_server_msg_t client_req_msg)
 {
-    struct client_sock_fd_t *client_hndlr =(struct client_sock_fd_t *)client_desc;
     struct client_info_t client_info;
     time_t client_join_leave_time; 
     client_join_leave_time=time(NULL); 
     char stdout_msg[MAX_Tx_Rx_BUFFER];
 
-    int sock =client_hndlr->client_sock;
+    int sock =client_desc.client_sock;
     char message[MAX_Tx_Rx_BUFFER];
     uint32_t client_group;
     uint32_t client_choice;
     
     //Populate client details.// 
     client_info.client_id=client_id;
-    strncpy(client_info.client_ip,client_hndlr->client_ip,sizeof(client_info.client_ip));
+    strncpy(client_info.client_ip,client_desc.client_ip,sizeof(client_info.client_ip));
     
     client_choice=client_req_msg.cs_msg_type;
     switch(client_choice) 
@@ -212,6 +212,7 @@ void * client_connection_hndl(void *)
     int sel;
     struct timeval waitd;
     client_server_msg_t client_server_msg;
+    uint32_t fd;
 
     /*Create server socket*/
     if(!server_socket_create()) {
@@ -221,8 +222,8 @@ void * client_connection_hndl(void *)
     listen(get_server_sock_fd(),3);
     puts("Server is running");
     FD_ZERO(&client_server_fds);
-    FD_SET(&test_read_fds);
-    FD_SET(&test_write_fds);
+    FD_ZERO(&test_read_fds);
+    FD_ZERO(&test_write_fds);
     FD_SET(get_server_sock_fd(),&client_server_fds);
     
     while(1) { 
@@ -236,7 +237,7 @@ void * client_connection_hndl(void *)
 	if(FD_ISSET(fd,&test_read_fds)) {
             FD_CLR(fd,&test_read_fds); 
             if(fd==get_server_sock_fd()) {
-               client_sock_hndl=accept(get_server_sock_fd(),(struct sockaddr *)&client_addr,&c); 
+               client_sock_hndl=accept(get_server_sock_fd(),(struct sockaddr *)&client_addr,(socklen_t*)&c); 
                if(client_sock_hndl<0) {
 		  printf("Failed to connect to the server");
 		  exit(1);
@@ -258,24 +259,25 @@ void * client_connection_hndl(void *)
                }
                //Handshake Successful
                incr_client_cnt();
-               add_to_g_sock_info(client_fd);
+               add_client_sock_info(client_fd);
                //add to database;
           }
          else {
-            memset(client_server_msg,0,sizeof(client_server_msg_t));
+            memset(&client_server_msg,0,sizeof(client_server_msg_t));
             if(recv(fd,&client_server_msg,sizeof(client_server_msg),0)<0) {
 		printf("Failed");
                 break;
              }
-            client_sock_info_t client_sock_info;
-            clien_sock_info = get_client_sock_info(fd);
+            client_sock_fd_t client_sock_info;
+            client_sock_info = get_client_sock_info(fd);
             register_client(client_sock_info,client_server_msg);
             }
           }
          if(FD_ISSET(fd,&test_write_fds)) {
-	   FD_CLR(fd,test_write_fds);
+	   FD_CLR(fd,&test_write_fds);
           //send message//
          }
+}
   }
 }
          
