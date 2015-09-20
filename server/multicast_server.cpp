@@ -193,8 +193,11 @@ void *register_client(struct client_sock_fd_t client_desc,client_server_msg_t cl
          sprintf(stdout_msg,"\n%s:%s:Successfully unregistered from  Mgroup \n",ctime(&client_join_leave_time),client_info.client_ip);
          puts(stdout_msg);
          break;
-
-        
+     case MSG_TYPE_COMPUTE_TASK:
+	 int *comput_detail_info=NULL;
+         comput_detail_info=(int *)malloc(3*sizeof(int)); 
+         comput_detail_info=client_req_msg.cs_comput_output;
+         handle_result(comput_detail_info);
     }
 }
          
