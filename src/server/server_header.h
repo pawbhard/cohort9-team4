@@ -81,3 +81,4 @@ class Result
    int get_mean () {return mean_final;}
    int get_mean_elements () {return mean_elements;}
 };
+void handle_result(uint32_t *arr);

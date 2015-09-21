@@ -1,9 +1,9 @@
-typedef enum multicast_group_ {
+/*typedef enum multicast_group_ {
     MEAN,
     DEVIATION,
     RANGE
 } multicast_group_t;
-
+*/
 struct g_server_sock_t 
 {
     uint32_t server_sock;

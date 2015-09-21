@@ -175,7 +175,7 @@ void *register_client(struct client_sock_fd_t client_desc,client_server_msg_t cl
          memset(stdout_msg,0,sizeof(stdout_msg));
          sprintf(stdout_msg,"\n%s:%s:Successfully Registered to  Mgroup \n",ctime(&client_join_leave_time),client_info.client_ip);
          puts(stdout_msg);
-         DB->add_client_group(client_info.client_id,client_info.multicast_group_id);
+         d->add_client_group(client_info.client_id,client_info.multicast_group_id);
          
          break;
 
@@ -199,7 +199,7 @@ void *register_client(struct client_sock_fd_t client_desc,client_server_msg_t cl
          memset(stdout_msg,0,sizeof(stdout_msg));
          sprintf(stdout_msg,"\n%s:%s:Successfully unregistered from  Mgroup \n",ctime(&client_join_leave_time),client_info.client_ip);
          puts(stdout_msg);
-         DB->remove(client_info.client_id);
+         d->remove_client(client_info.client_id);
          break;
      case MSG_TYPE_COMPUTE_TASK:
 	 uint32_t *comput_detail_info=NULL;

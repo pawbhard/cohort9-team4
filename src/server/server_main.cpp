@@ -10,6 +10,13 @@ track_data *track_data::td = NULL;
 using namespace std;
 
 extern list <SwitchDataBuffer *>init_data_buffers();
+void handle_result(uint32_t *arr) {
+    if(arr == NULL) assert(0);
+    SERVER_DEBUG("Received %d, %d, %d for updating result");
+    Result *r;
+    r = Result::get_instance();
+    r->update_result(arr[0],arr[1],arr[2]);
+}
 
 void startServerDataCollection(list <SwitchDataBuffer *> &switch_list) {
     int *cpu_data;
